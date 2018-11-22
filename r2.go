@@ -4,7 +4,7 @@ import "fmt"
 
 type Ins struct {
 	Op OpCode
-	C  byte
+	S  string
 	X  int
 	Y  int
 }
@@ -12,22 +12,24 @@ type Ins struct {
 type OpCode string
 
 const (
-	OpChar  OpCode = "char"
-	OpMatch OpCode = "match"
-	OpJmp   OpCode = "jmp"
-	OpSplit OpCode = "split"
+	OpMatch  OpCode = "match"
+	OpJmp    OpCode = "jmp"
+	OpSplit  OpCode = "split"
+	OpString OpCode = "string"
 )
 
 func Run(s string, p []*Ins, pc int) bool {
 	ins := p[pc]
 	switch ins.Op {
-	case OpChar:
-		if len(s) == 0 || s[0] != ins.C {
+	case OpString:
+		if len(s) < len(ins.S) {
+			return false
+		} else if s[0:len(ins.S)] != ins.S {
 			return false
 		}
-		return Run(s[1:], p, pc+1)
+		return Run(s[len(ins.S):], p, pc+1)
 	case OpMatch:
-		return true
+		return len(s) == 0
 	case OpJmp:
 		return Run(s, p, pc+ins.X)
 	case OpSplit:
@@ -44,11 +46,7 @@ func Match(p []*Ins) []*Ins {
 }
 
 func String(s string) []*Ins {
-	ins := make([]*Ins, len(s))
-	for i := 0; i < len(s); i++ {
-		ins[i] = &Ins{Op: OpChar, C: s[i]}
-	}
-	return ins
+	return []*Ins{&Ins{Op: OpString, S: s}}
 }
 
 func Concat(a, b []*Ins) []*Ins {
@@ -65,12 +63,34 @@ func Plus(p []*Ins) []*Ins {
 	return append(p, &Ins{Op: OpSplit, X: -len(p), Y: 1})
 }
 
+func Star(p []*Ins) []*Ins {
+	split := &Ins{Op: OpSplit, X: 1, Y: len(p) + 2}
+	jmp := &Ins{Op: OpJmp, X: -(len(p) + 1)}
+	return append(append([]*Ins{split}, p...), jmp)
+}
+
+func QuestionMark(p []*Ins) []*Ins {
+	split := &Ins{Op: OpSplit, X: 1, Y: len(p) + 1}
+	return append([]*Ins{split}, p...)
+}
+
+func Repeat(min, max int, p []*Ins) []*Ins {
+	var newP []*Ins
+	for i := 0; i < min; i++ {
+		newP = Concat(newP, p)
+	}
+	for i := 0; i < max-min; i++ {
+		newP = Concat(newP, QuestionMark(p))
+	}
+	return newP
+}
+
 func Print(p []*Ins) {
 	for i, ins := range p {
 		fmt.Printf("% 3d: %s", i, ins.Op)
 		switch ins.Op {
-		case OpChar:
-			fmt.Print(" " + string(ins.C))
+		case OpString:
+			fmt.Print(" " + string(ins.S))
 		case OpSplit:
 			fmt.Printf(" %d %d", i+ins.X, i+ins.Y)
 		case OpJmp:
