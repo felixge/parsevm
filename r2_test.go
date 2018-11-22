@@ -5,36 +5,46 @@ import (
 )
 
 func TestMatch(t *testing.T) {
-	ab := Match(Concat(Plus(String("a")), Plus(String("b"))))
-	hello := Match(String("hello"))
-	helloOrWorld := Match(Alt(String("hello"), String("world")))
-	Print(helloOrWorld)
+	str := Match(String("abc"))
+	strConcat := Match(Concat(String("ab"), String("c")))
+	strAlt := Match(Alt(String("abc"), String("def")))
+	strPlus := Match(Plus(String("abc")))
 
 	tests := []struct {
 		Program []*Ins
 		Input   string
 		Want    bool
 	}{
-		{ab, "ab", true},
-		{ab, "aab", true},
-		{ab, "abb", true},
-		{ab, "aabb", true},
+		{str, "abc", true},
+		{str, "abd", false},
+		{str, "dbc", false},
+		{str, "ab", false},
+		{str, "bc", false},
+		{str, "", false},
 
-		{ab, "ac", false},
-		{ab, "cb", false},
-		{ab, "aaaac", false},
+		{strConcat, "abc", true},
+		{strConcat, "abd", false},
+		{strConcat, "dbc", false},
+		{strConcat, "ab", false},
+		{strConcat, "bc", false},
+		{strConcat, "", false},
 
-		{hello, "hello", true},
-		{hello, "world", false},
-		{hello, "ello", false},
-		{hello, "hell", false},
-		{hello, "hella", false},
+		{strAlt, "def", true},
+		{strAlt, "abc", true},
+		{strAlt, "abd", false},
+		{strAlt, "dbc", false},
+		{strAlt, "ab", false},
+		{strAlt, "bc", false},
+		{strAlt, "", false},
 
-		{helloOrWorld, "hello", true},
-		{helloOrWorld, "world", true},
-		{helloOrWorld, "ello", false},
-		{helloOrWorld, "hell", false},
-		{helloOrWorld, "hella", false},
+		{strPlus, "abcabc", true},
+		{strPlus, "abcabcabc", true},
+		{strPlus, "abc", true},
+		{strPlus, "abd", false},
+		{strPlus, "dbc", false},
+		{strPlus, "ab", false},
+		{strPlus, "bc", false},
+		{strPlus, "", false},
 	}
 
 	for _, test := range tests {
