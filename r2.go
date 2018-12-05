@@ -19,32 +19,51 @@ const (
 	OpRange  OpCode = "range"
 )
 
-func Run(s string, p []*Ins, pc int) bool {
-	ins := p[pc]
+type Thread struct {
+	P  []*Ins
+	PC int
+}
+
+func (t *Thread) Split() *Thread {
+	return &Thread{P: t.P, PC: t.PC}
+}
+
+func Run(s string, t *Thread) *Thread {
+	ins := t.P[t.PC]
 	switch ins.Op {
 	case OpRange:
 		if len(s) == 0 {
-			return false
+			return nil
 		} else if s[0] < ins.S[0] || s[0] > ins.S[1] {
-			return false
+			return nil
 		}
-		return Run(s[1:], p, pc+1)
+		t.PC += 1
+		return Run(s[1:], t)
 	case OpString:
 		if len(s) < len(ins.S) {
-			return false
+			return nil
 		} else if s[0:len(ins.S)] != ins.S {
-			return false
+			return nil
 		}
-		return Run(s[len(ins.S):], p, pc+1)
+		t.PC += 1
+		return Run(s[len(ins.S):], t)
 	case OpMatch:
-		return len(s) == 0
-	case OpJmp:
-		return Run(s, p, pc+ins.X)
-	case OpSplit:
-		if Run(s, p, pc+ins.X) {
-			return true
+		if len(s) == 0 {
+			return t
 		}
-		return Run(s, p, pc+ins.Y)
+		return nil
+	case OpJmp:
+		t.PC += ins.X
+		return Run(s, t)
+	case OpSplit:
+		t1 := t
+		t2 := t.Split()
+		t1.PC += ins.X
+		t2.PC += ins.Y
+		if t1 := Run(s, t1); t1 != nil {
+			return t1
+		}
+		return Run(s, t2)
 	}
 	panic("unreachable")
 }

@@ -90,7 +90,8 @@ func TestMatch(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		got := Run(test.Input, test.Program, 0)
+		td := &Thread{test.Program, 0}
+		got := Run(test.Input, td) != nil
 		if got != test.Want {
 			t.Errorf("test=%s input=%q got=%t want=%t", test.Name, test.Input, got, test.Want)
 		}
