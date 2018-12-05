@@ -14,8 +14,6 @@ func TestMatch(t *testing.T) {
 	strRepeat := Match(Repeat(2, 3, String("abc")))
 	strAlpha := Match(Alpha())
 
-	Print(strAlt)
-
 	tests := []struct {
 		Name    string
 		Program []*Ins
