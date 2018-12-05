@@ -12,8 +12,9 @@ func TestMatch(t *testing.T) {
 	strStar := Match(Star(String("abc")))
 	strQuestionMark := Match(QuestionMark(String("abc")))
 	strRepeat := Match(Repeat(2, 3, String("abc")))
+	strAlpha := Match(Alpha())
 
-	Print(strRepeat)
+	Print(strAlt)
 
 	tests := []struct {
 		Name    string
@@ -79,6 +80,15 @@ func TestMatch(t *testing.T) {
 		{"strRepeat", strRepeat, "ab", false},
 		{"strRepeat", strRepeat, "bc", false},
 		{"strRepeat", strRepeat, "", false},
+
+		{"strAlpha", strAlpha, "a", true},
+		{"strAlpha", strAlpha, "b", true},
+		{"strAlpha", strAlpha, "y", true},
+		{"strAlpha", strAlpha, "z", true},
+		{"strAlpha", strAlpha, "0", false},
+		{"strAlpha", strAlpha, "-", false},
+		{"strAlpha", strAlpha, " ", false},
+		{"strAlpha", strAlpha, "", false},
 	}
 
 	for _, test := range tests {

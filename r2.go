@@ -16,11 +16,19 @@ const (
 	OpJmp    OpCode = "jmp"
 	OpSplit  OpCode = "split"
 	OpString OpCode = "string"
+	OpRange  OpCode = "range"
 )
 
 func Run(s string, p []*Ins, pc int) bool {
 	ins := p[pc]
 	switch ins.Op {
+	case OpRange:
+		if len(s) == 0 {
+			return false
+		} else if s[0] < ins.S[0] || s[0] > ins.S[1] {
+			return false
+		}
+		return Run(s[1:], p, pc+1)
 	case OpString:
 		if len(s) < len(ins.S) {
 			return false
@@ -49,8 +57,12 @@ func String(s string) []*Ins {
 	return []*Ins{&Ins{Op: OpString, S: s}}
 }
 
-func Concat(a, b []*Ins) []*Ins {
-	return append(a, b...)
+func Concat(parts ...[]*Ins) []*Ins {
+	var newP []*Ins
+	for _, p := range parts {
+		newP = append(newP, p...)
+	}
+	return newP
 }
 
 func Alt(a, b []*Ins) []*Ins {
@@ -85,12 +97,26 @@ func Repeat(min, max int, p []*Ins) []*Ins {
 	return newP
 }
 
+func Range(start byte, end byte) []*Ins {
+	return []*Ins{&Ins{Op: OpRange, S: string(start) + string(end)}}
+}
+
+func Alpha() []*Ins {
+	return Alt(Range('a', 'z'), Range('A', 'Z'))
+}
+
+func Capture(name string, p []*Ins) []*Ins {
+	return p
+}
+
 func Print(p []*Ins) {
 	for i, ins := range p {
 		fmt.Printf("% 3d: %s", i, ins.Op)
 		switch ins.Op {
+		case OpRange:
+			fmt.Printf(" %q %q", string(ins.S[0]), string(ins.S[1]))
 		case OpString:
-			fmt.Print(" " + string(ins.S))
+			fmt.Printf(" %q", ins.S)
 		case OpSplit:
 			fmt.Printf(" %d %d", i+ins.X, i+ins.Y)
 		case OpJmp:
