@@ -16,7 +16,7 @@ func TestMatch(t *testing.T) {
 
 	tests := []struct {
 		Name    string
-		Program []*Ins
+		Program []Ins
 		Input   string
 		Want    bool
 	}{

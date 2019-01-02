@@ -2,25 +2,30 @@ package r2
 
 import "fmt"
 
-type Ins struct {
-	Op OpCode
-	S  string
-	X  int
-	Y  int
+type Ins interface{}
+
+type OpMatch struct{}
+
+type OpJmp struct {
+	N int
 }
 
-type OpCode string
+type OpSplit struct {
+	A int
+	B int
+}
 
-const (
-	OpMatch  OpCode = "match"
-	OpJmp    OpCode = "jmp"
-	OpSplit  OpCode = "split"
-	OpString OpCode = "string"
-	OpRange  OpCode = "range"
-)
+type OpString struct {
+	Value string
+}
+
+type OpRange struct {
+	Start byte
+	End   byte
+}
 
 type Thread struct {
-	P  []*Ins
+	P  []Ins
 	PC int
 }
 
@@ -29,37 +34,36 @@ func (t *Thread) Split() *Thread {
 }
 
 func Run(s string, t *Thread) *Thread {
-	ins := t.P[t.PC]
-	switch ins.Op {
+	switch op := t.P[t.PC].(type) {
 	case OpRange:
 		if len(s) == 0 {
 			return nil
-		} else if s[0] < ins.S[0] || s[0] > ins.S[1] {
+		} else if s[0] < op.Start || s[0] > op.End {
 			return nil
 		}
 		t.PC += 1
 		return Run(s[1:], t)
 	case OpString:
-		if len(s) < len(ins.S) {
+		if len(s) < len(op.Value) {
 			return nil
-		} else if s[0:len(ins.S)] != ins.S {
+		} else if s[0:len(op.Value)] != op.Value {
 			return nil
 		}
 		t.PC += 1
-		return Run(s[len(ins.S):], t)
+		return Run(s[len(op.Value):], t)
 	case OpMatch:
 		if len(s) == 0 {
 			return t
 		}
 		return nil
 	case OpJmp:
-		t.PC += ins.X
+		t.PC += op.N
 		return Run(s, t)
 	case OpSplit:
 		t1 := t
 		t2 := t.Split()
-		t1.PC += ins.X
-		t2.PC += ins.Y
+		t1.PC += op.A
+		t2.PC += op.B
 		if t1 := Run(s, t1); t1 != nil {
 			return t1
 		}
@@ -68,45 +72,45 @@ func Run(s string, t *Thread) *Thread {
 	panic("unreachable")
 }
 
-func Match(p []*Ins) []*Ins {
-	return append(p, &Ins{Op: OpMatch})
+func Match(p []Ins) []Ins {
+	return append(p, OpMatch{})
 }
 
-func String(s string) []*Ins {
-	return []*Ins{&Ins{Op: OpString, S: s}}
+func String(s string) []Ins {
+	return []Ins{OpString{s}}
 }
 
-func Concat(parts ...[]*Ins) []*Ins {
-	var newP []*Ins
+func Concat(parts ...[]Ins) []Ins {
+	var newP []Ins
 	for _, p := range parts {
 		newP = append(newP, p...)
 	}
 	return newP
 }
 
-func Alt(a, b []*Ins) []*Ins {
-	split := &Ins{Op: OpSplit, X: 1, Y: len(a) + 2}
-	jmp := &Ins{Op: OpJmp, X: len(b) + 1}
-	return append(append(append([]*Ins{split}, a...), jmp), b...)
+func Alt(a, b []Ins) []Ins {
+	split := OpSplit{1, len(a) + 2}
+	jmp := OpJmp{len(b) + 1}
+	return append(append(append([]Ins{split}, a...), jmp), b...)
 }
 
-func Plus(p []*Ins) []*Ins {
-	return append(p, &Ins{Op: OpSplit, X: -len(p), Y: 1})
+func Plus(p []Ins) []Ins {
+	return append(p, OpSplit{-len(p), 1})
 }
 
-func Star(p []*Ins) []*Ins {
-	split := &Ins{Op: OpSplit, X: 1, Y: len(p) + 2}
-	jmp := &Ins{Op: OpJmp, X: -(len(p) + 1)}
-	return append(append([]*Ins{split}, p...), jmp)
+func Star(p []Ins) []Ins {
+	split := OpSplit{1, len(p) + 2}
+	jmp := OpJmp{-(len(p) + 1)}
+	return append(append([]Ins{split}, p...), jmp)
 }
 
-func QuestionMark(p []*Ins) []*Ins {
-	split := &Ins{Op: OpSplit, X: 1, Y: len(p) + 1}
-	return append([]*Ins{split}, p...)
+func QuestionMark(p []Ins) []Ins {
+	split := OpSplit{1, len(p) + 1}
+	return append([]Ins{split}, p...)
 }
 
-func Repeat(min, max int, p []*Ins) []*Ins {
-	var newP []*Ins
+func Repeat(min, max int, p []Ins) []Ins {
+	var newP []Ins
 	for i := 0; i < min; i++ {
 		newP = Concat(newP, p)
 	}
@@ -116,30 +120,30 @@ func Repeat(min, max int, p []*Ins) []*Ins {
 	return newP
 }
 
-func Range(start byte, end byte) []*Ins {
-	return []*Ins{&Ins{Op: OpRange, S: string(start) + string(end)}}
+func Range(start byte, end byte) []Ins {
+	return []Ins{OpRange{start, end}}
 }
 
-func Alpha() []*Ins {
+func Alpha() []Ins {
 	return Alt(Range('a', 'z'), Range('A', 'Z'))
 }
 
-func Capture(name string, p []*Ins) []*Ins {
+func Capture(name string, p []Ins) []Ins {
 	return p
 }
 
-func Print(p []*Ins) {
+func Print(p []Ins) {
 	for i, ins := range p {
-		fmt.Printf("% 3d: %s", i, ins.Op)
-		switch ins.Op {
+		fmt.Printf("% 3d: ", i)
+		switch op := ins.(type) {
 		case OpRange:
-			fmt.Printf(" %q %q", string(ins.S[0]), string(ins.S[1]))
+			fmt.Printf("range %q %q", string(op.Start), string(op.End))
 		case OpString:
-			fmt.Printf(" %q", ins.S)
+			fmt.Printf("string %q", op.Value)
 		case OpSplit:
-			fmt.Printf(" %d %d", i+ins.X, i+ins.Y)
+			fmt.Printf("split %d %d", i+op.A, i+op.B)
 		case OpJmp:
-			fmt.Printf(" %d", i+ins.X)
+			fmt.Printf("jmp %d", i+op.N)
 		}
 		fmt.Print("\n")
 	}
