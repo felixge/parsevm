@@ -29,19 +29,33 @@ type OpCapture struct {
 	Start bool
 }
 
+type CaptureGroup struct {
+	Name  string
+	Value string
+	Done  bool
+}
+
 type Thread struct {
-	P  []Ins
-	PC int
+	P        []Ins
+	PC       int
+	Captures []CaptureGroup
 }
 
 func (t *Thread) Clone() *Thread {
-	return &Thread{P: t.P, PC: t.PC}
+	captures := make([]CaptureGroup, len(t.Captures))
+	copy(captures, t.Captures)
+	return &Thread{P: t.P, PC: t.PC, Captures: captures}
 }
 
 func Run(s string, t *Thread) *Thread {
 	switch op := t.P[t.PC].(type) {
 	case OpCapture:
 		t.PC += 1
+		if op.Start {
+			t.startCapture(op.Name)
+		} else {
+			t.endCapture()
+		}
 		return Run(s, t)
 	case OpRange:
 		if len(s) == 0 {
@@ -50,6 +64,7 @@ func Run(s string, t *Thread) *Thread {
 			return nil
 		}
 		t.PC += 1
+		t.capture(string(s[0]))
 		return Run(s[1:], t)
 	case OpString:
 		if len(s) < len(op.Value) {
@@ -58,6 +73,7 @@ func Run(s string, t *Thread) *Thread {
 			return nil
 		}
 		t.PC += 1
+		t.capture(op.Value)
 		return Run(s[len(op.Value):], t)
 	case OpMatch:
 		if len(s) == 0 {
@@ -78,6 +94,27 @@ func Run(s string, t *Thread) *Thread {
 		return Run(s, t2)
 	}
 	panic("unreachable")
+}
+
+func (t *Thread) startCapture(name string) {
+	t.Captures = append(t.Captures, CaptureGroup{Name: name})
+}
+
+func (t *Thread) endCapture() {
+	for i := len(t.Captures) - 1; i >= 0; i-- {
+		if !t.Captures[i].Done {
+			t.Captures[i].Done = true
+			break
+		}
+	}
+}
+
+func (t *Thread) capture(s string) {
+	for i := range t.Captures {
+		if !t.Captures[i].Done {
+			t.Captures[i].Value += s
+		}
+	}
 }
 
 func Match(p []Ins) []Ins {

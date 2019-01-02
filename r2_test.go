@@ -92,7 +92,7 @@ func TestMatch(t *testing.T) {
 
 	for _, test := range tests {
 		Print(test.Program)
-		td := &Thread{test.Program, 0}
+		td := &Thread{P: test.Program}
 		got := Run(test.Input, td) != nil
 		if got != test.Want {
 			t.Errorf("test=%s input=%q got=%t want=%t", test.Name, test.Input, got, test.Want)
@@ -102,12 +102,16 @@ func TestMatch(t *testing.T) {
 
 func TestCapture(t *testing.T) {
 	p := Match(Capture(
-		"ab",
-		Alt(
-			Capture("a", String("abc")),
-			Capture("b", String("def")),
+		"all",
+		Concat(
+			Star(Range('1', '9')),
+			Alt(
+				Capture("abc", String("abc")),
+				Capture("def", String("def")),
+			),
 		),
 	))
-	a := Run("abc", &Thread{P: p})
-	fmt.Printf("%#v\n", a)
+	Print(p)
+	a := Run("123abc", &Thread{P: p})
+	fmt.Printf("%#v\n", a.Captures)
 }
