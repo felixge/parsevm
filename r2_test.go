@@ -104,7 +104,7 @@ func TestCapture(t *testing.T) {
 	p := Match(Capture(
 		"all",
 		Concat(
-			Star(Range('1', '9')),
+			Star(Capture("pair", Repeat(2, 2, Range('1', '9')))),
 			Alt(
 				Capture("abc", String("abc")),
 				Capture("def", String("def")),
@@ -112,6 +112,6 @@ func TestCapture(t *testing.T) {
 		),
 	))
 	Print(p)
-	a := Run("123abc", &Thread{P: p})
+	a := Run("1234abc", &Thread{P: p})
 	fmt.Printf("%#v\n", a.Captures)
 }
