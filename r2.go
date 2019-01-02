@@ -144,6 +144,10 @@ func Print(p []Ins) {
 			fmt.Printf("split %d %d", i+op.A, i+op.B)
 		case OpJmp:
 			fmt.Printf("jmp %d", i+op.N)
+		case OpMatch:
+			fmt.Printf("match")
+		default:
+			panic("unreachable")
 		}
 		fmt.Print("\n")
 	}
