@@ -1,7 +1,6 @@
 package r2
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -91,7 +90,7 @@ func TestMatch(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		Print(test.Program)
+		//Print(test.Program)
 		td := &Thread{P: test.Program}
 		got := Run(test.Input, td) != nil
 		if got != test.Want {
@@ -100,18 +99,53 @@ func TestMatch(t *testing.T) {
 	}
 }
 
-func TestCapture(t *testing.T) {
-	p := Match(Capture(
-		"all",
-		Concat(
-			Star(Capture("pair", Repeat(2, 2, Range('1', '9')))),
-			Alt(
-				Capture("abc", String("abc")),
-				Capture("def", String("def")),
-			),
-		),
-	))
-	Print(p)
-	a := Run("1234abc", &Thread{P: p})
-	fmt.Printf("%#v\n", a.Captures)
-}
+//func TestCapture(t *testing.T) {
+//p := Match(Capture(
+//"all",
+//Concat(
+//Capture("pairs", Star(Capture("pair", Repeat(2, 2, Range('1', '9'))))),
+//Alt(
+//Capture("abc", String("abc")),
+//Capture("def", String("def")),
+//),
+//),
+//))
+//Print(p)
+//a := Run("1234abc", &Thread{P: p})
+//for _, c := range a.Captures {
+//fmt.Printf("%s%s %s\n", strings.Repeat("  ", c.Depth), c.Name, c.Value)
+//}
+//}
+
+//func TestJSON(t *testing.T) {
+//whitespace := Plus(Alt(Alt(Alt(
+//String(" "),
+//String("\n"),
+//), String("\t")),
+//String("\r"),
+//))
+//str := Capture("string", Concat(
+//String(`"`),
+//Star(Range('a', 'z')),
+//String(`"`),
+//))
+////object := Capture("object", Concat(
+////String("{"),
+////whitespace,
+////str,
+////whitespace,
+////String(":"),
+////whitespace,
+////str,
+////whitespace,
+////String("}"),
+////))
+////doc := Star(Alt(str, whitespace))
+//doc := Star(Alt(str, whitespace))
+//p := Match(doc)
+//Print(p)
+//a := Run(`"foo"  "bar"`, &Thread{P: p})
+//for _, c := range a.Captures {
+//fmt.Printf("%s%s %s\n", strings.Repeat("  ", c.Depth), c.Name, c.Value)
+//}
+//}
