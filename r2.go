@@ -32,6 +32,7 @@ type OpCapture struct {
 type CaptureGroup struct {
 	Name  string
 	Value string
+	Depth int
 	Done  bool
 }
 
@@ -97,7 +98,13 @@ func Run(s string, t *Thread) *Thread {
 }
 
 func (t *Thread) startCapture(name string) {
-	t.Captures = append(t.Captures, CaptureGroup{Name: name})
+	depth := 0
+	for _, capture := range t.Captures {
+		if !capture.Done {
+			depth++
+		}
+	}
+	t.Captures = append(t.Captures, CaptureGroup{Name: name, Depth: depth})
 }
 
 func (t *Thread) endCapture() {
