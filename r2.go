@@ -24,17 +24,25 @@ type OpRange struct {
 	End   byte
 }
 
+type OpCapture struct {
+	Name  string
+	Start bool
+}
+
 type Thread struct {
 	P  []Ins
 	PC int
 }
 
-func (t *Thread) Split() *Thread {
+func (t *Thread) Clone() *Thread {
 	return &Thread{P: t.P, PC: t.PC}
 }
 
 func Run(s string, t *Thread) *Thread {
 	switch op := t.P[t.PC].(type) {
+	case OpCapture:
+		t.PC += 1
+		return Run(s, t)
 	case OpRange:
 		if len(s) == 0 {
 			return nil
@@ -61,7 +69,7 @@ func Run(s string, t *Thread) *Thread {
 		return Run(s, t)
 	case OpSplit:
 		t1 := t
-		t2 := t.Split()
+		t2 := t.Clone()
 		t1.PC += op.A
 		t2.PC += op.B
 		if t1 := Run(s, t1); t1 != nil {
@@ -129,7 +137,9 @@ func Alpha() []Ins {
 }
 
 func Capture(name string, p []Ins) []Ins {
-	return p
+	start := OpCapture{name, true}
+	stop := OpCapture{name, false}
+	return append(append([]Ins{start}, p...), stop)
 }
 
 func Print(p []Ins) {
@@ -144,6 +154,12 @@ func Print(p []Ins) {
 			fmt.Printf("split %d %d", i+op.A, i+op.B)
 		case OpJmp:
 			fmt.Printf("jmp %d", i+op.N)
+		case OpCapture:
+			start := "start"
+			if !op.Start {
+				start = "end"
+			}
+			fmt.Printf("capture %s %s", start, op.Name)
 		case OpMatch:
 			fmt.Printf("match")
 		default:

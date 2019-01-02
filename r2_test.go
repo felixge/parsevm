@@ -1,6 +1,7 @@
 package r2
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -90,10 +91,23 @@ func TestMatch(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		Print(test.Program)
 		td := &Thread{test.Program, 0}
 		got := Run(test.Input, td) != nil
 		if got != test.Want {
 			t.Errorf("test=%s input=%q got=%t want=%t", test.Name, test.Input, got, test.Want)
 		}
 	}
+}
+
+func TestCapture(t *testing.T) {
+	p := Match(Capture(
+		"ab",
+		Alt(
+			Capture("a", String("abc")),
+			Capture("b", String("def")),
+		),
+	))
+	a := Run("abc", &Thread{P: p})
+	fmt.Printf("%#v\n", a)
 }
