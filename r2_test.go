@@ -1,6 +1,8 @@
 package r2
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -91,8 +93,7 @@ func TestMatch(t *testing.T) {
 
 	for _, test := range tests {
 		//Print(test.Program)
-		td := &Thread{P: test.Program}
-		got := Run(test.Input, td) != nil
+		got := Run(test.Input, test.Program) != nil
 		if got != test.Want {
 			t.Errorf("test=%s input=%q got=%t want=%t", test.Name, test.Input, got, test.Want)
 		}

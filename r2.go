@@ -37,18 +37,39 @@ type CaptureGroup struct {
 }
 
 type Thread struct {
+	S        string
 	P        []Ins
 	PC       int
 	Captures []CaptureGroup
+	Match    bool
 }
 
 func (t *Thread) Clone() *Thread {
 	captures := make([]CaptureGroup, len(t.Captures))
 	copy(captures, t.Captures)
-	return &Thread{P: t.P, PC: t.PC, Captures: captures}
+	return &Thread{S: t.S, P: t.P, PC: t.PC, Captures: captures}
 }
 
-func Run(s string, t *Thread) *Thread {
+func Run(s string, p []Ins) *Thread {
+	threads := []*Thread{{P: p, S: s}}
+	for len(threads) > 0 {
+		newThreads := make([]*Thread, 0, len(threads))
+		for _, t := range threads {
+			children := t.next()
+			for _, child := range children {
+				if child.Match {
+					return child
+				}
+			}
+			newThreads = append(newThreads, children...)
+		}
+		threads = newThreads
+	}
+	return nil
+}
+
+func (t *Thread) next() []*Thread {
+	self := []*Thread{t}
 	switch op := t.P[t.PC].(type) {
 	case OpCapture:
 		t.PC += 1
@@ -57,46 +78,44 @@ func Run(s string, t *Thread) *Thread {
 		} else {
 			t.endCapture()
 		}
-		return Run(s, t)
+		return self
 	case OpRange:
-		if len(s) == 0 {
+		if len(t.S) == 0 {
 			return nil
-		} else if s[0] < op.Start || s[0] > op.End {
+		} else if t.S[0] < op.Start || t.S[0] > op.End {
 			return nil
 		}
 		t.PC += 1
-		t.capture(string(s[0]))
-		return Run(s[1:], t)
+		t.capture(string(t.S[0]))
+		t.S = t.S[1:]
+		return self
 	case OpString:
-		if len(s) < len(op.Value) {
+		if len(t.S) < len(op.Value) {
 			return nil
-		} else if s[0:len(op.Value)] != op.Value {
+		} else if t.S[0:len(op.Value)] != op.Value {
 			return nil
 		}
 		t.PC += 1
 		t.capture(op.Value)
-		return Run(s[len(op.Value):], t)
+		t.S = t.S[len(op.Value):]
+		return self
 	case OpMatch:
-		if len(s) == 0 {
-			return t
+		if len(t.S) == 0 {
+			t.Match = true
+			return self
 		}
 		return nil
 	case OpJmp:
 		t.PC += op.N
-		return Run(s, t)
+		return self
 	case OpSplit:
-		t1 := t
-		t2 := t.Clone()
-		t1.PC += op.A
-		t2.PC += op.B
-		if t1 := Run(s, t1); t1 != nil {
-			return t1
-		}
-		return Run(s, t2)
+		clone := t.Clone()
+		t.PC += op.A
+		clone.PC += op.B
+		return append(self, clone)
 	}
 	panic("unreachable")
 }
-
 func (t *Thread) startCapture(name string) {
 	depth := 0
 	for _, capture := range t.Captures {
