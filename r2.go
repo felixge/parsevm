@@ -1,6 +1,10 @@
 package r2
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"strings"
+)
 
 type Ins interface{}
 
@@ -10,9 +14,8 @@ type OpJmp struct {
 	N int
 }
 
-type OpSplit struct {
-	A int
-	B int
+type OpFork struct {
+	N int
 }
 
 type OpString struct {
@@ -29,6 +32,16 @@ type OpCapture struct {
 	Start bool
 }
 
+type OpCall struct {
+	Name string
+}
+
+type OpFunc struct {
+	Name string
+}
+
+type OpReturn struct{}
+
 type CaptureGroup struct {
 	Name  string
 	Value string
@@ -37,26 +50,35 @@ type CaptureGroup struct {
 }
 
 type Thread struct {
+	ID       int
 	S        string
 	P        []Ins
 	PC       int
 	Captures []CaptureGroup
 	Match    bool
+	Stack    []int
 }
 
 func (t *Thread) Clone() *Thread {
 	captures := make([]CaptureGroup, len(t.Captures))
 	copy(captures, t.Captures)
-	return &Thread{S: t.S, P: t.P, PC: t.PC, Captures: captures}
+	stack := make([]int, len(t.Stack))
+	copy(stack, t.Stack)
+	return &Thread{S: t.S, P: t.P, PC: t.PC, Captures: captures, Stack: stack}
 }
 
 func Run(s string, p []Ins) *Thread {
-	threads := []*Thread{{P: p, S: s}}
+	threadID := 1
+	threads := []*Thread{{ID: threadID, P: p, S: s}}
 	for len(threads) > 0 {
 		newThreads := make([]*Thread, 0, len(threads))
 		for _, t := range threads {
 			children := t.next()
 			for _, child := range children {
+				if child.ID == 0 {
+					threadID++
+					child.ID = threadID
+				}
 				if child.Match {
 					return child
 				}
@@ -70,7 +92,31 @@ func Run(s string, p []Ins) *Thread {
 
 func (t *Thread) next() []*Thread {
 	self := []*Thread{t}
-	switch op := t.P[t.PC].(type) {
+	op := t.P[t.PC]
+	//fmt.Printf("t=% 3d pc=% 3d % 20s %#v\n", t.ID, t.PC, t.S, op)
+	switch op := op.(type) {
+	case OpFunc:
+		t.PC++
+		return self
+	case OpCall:
+		newPC := callPC(t.P, op)
+		if newPC == -1 {
+			panic(fmt.Sprintf("cannot call unkown func: %s", op.Name))
+		}
+		t.Stack = append(t.Stack, t.PC+1)
+		//fmt.Printf("call %#v\n", t.Stack)
+		t.PC = newPC + 1
+		return self
+	case OpReturn:
+		//fmt.Printf("return %#v\n", t.Stack)
+		//if len(t.Stack) == 0 {
+		//t.PC++
+		//return self
+		//}
+		tail := len(t.Stack) - 1
+		t.PC = t.Stack[tail]
+		t.Stack = t.Stack[0:tail]
+		return self
 	case OpCapture:
 		t.PC += 1
 		if op.Start {
@@ -85,7 +131,7 @@ func (t *Thread) next() []*Thread {
 		} else if t.S[0] < op.Start || t.S[0] > op.End {
 			return nil
 		}
-		t.PC += 1
+		t.PC++
 		t.capture(string(t.S[0]))
 		t.S = t.S[1:]
 		return self
@@ -95,7 +141,7 @@ func (t *Thread) next() []*Thread {
 		} else if t.S[0:len(op.Value)] != op.Value {
 			return nil
 		}
-		t.PC += 1
+		t.PC++
 		t.capture(op.Value)
 		t.S = t.S[len(op.Value):]
 		return self
@@ -108,14 +154,28 @@ func (t *Thread) next() []*Thread {
 	case OpJmp:
 		t.PC += op.N
 		return self
-	case OpSplit:
+	case OpFork:
 		clone := t.Clone()
-		t.PC += op.A
-		clone.PC += op.B
+		t.PC += 1
+		clone.PC += op.N
 		return append(self, clone)
 	}
-	panic("unreachable")
+	panic(fmt.Sprintf("unknown op: %#v", op))
 }
+
+func callPC(p []Ins, c OpCall) int {
+	pc := -1
+	for i, ins := range p {
+		fn, ok := ins.(OpFunc)
+		if !ok || fn.Name != c.Name {
+			continue
+		}
+		pc = i
+		break
+	}
+	return pc
+}
+
 func (t *Thread) startCapture(name string) {
 	depth := 0
 	for _, capture := range t.Captures {
@@ -160,24 +220,24 @@ func Concat(parts ...[]Ins) []Ins {
 }
 
 func Alt(a, b []Ins) []Ins {
-	split := OpSplit{1, len(a) + 2}
+	fork := OpFork{len(a) + 2}
 	jmp := OpJmp{len(b) + 1}
-	return append(append(append([]Ins{split}, a...), jmp), b...)
+	return append(append(append([]Ins{fork}, a...), jmp), b...)
 }
 
 func Plus(p []Ins) []Ins {
-	return append(p, OpSplit{-len(p), 1})
+	return append(p, OpFork{-len(p)})
 }
 
 func Star(p []Ins) []Ins {
-	split := OpSplit{1, len(p) + 2}
+	fork := OpFork{len(p) + 2}
 	jmp := OpJmp{-(len(p) + 1)}
-	return append(append([]Ins{split}, p...), jmp)
+	return append(append([]Ins{fork}, p...), jmp)
 }
 
 func QuestionMark(p []Ins) []Ins {
-	split := OpSplit{1, len(p) + 1}
-	return append([]Ins{split}, p...)
+	fork := OpFork{len(p) + 1}
+	return append([]Ins{fork}, p...)
 }
 
 func Repeat(min, max int, p []Ins) []Ins {
@@ -205,16 +265,75 @@ func Capture(name string, p []Ins) []Ins {
 	return append(append([]Ins{start}, p...), stop)
 }
 
-func Print(p []Ins) {
+func Func(name string, ins []Ins) []Ins {
+	//return append(append([]Ins{OpCall{name}, OpJmp{len(ins) + 3}, OpFunc{name}}, ins...), OpReturn{})
+	return append(append([]Ins{OpFunc{name}}, ins...), OpReturn{})
+}
+
+func Call(name string) []Ins {
+	return []Ins{OpCall{name}}
+}
+
+func Graphviz(p []Ins) []byte {
+	buf := bytes.NewBuffer(nil)
+	fmt.Fprintf(buf, "digraph g {\n")
 	for i, ins := range p {
-		fmt.Printf("% 3d: ", i)
+		var label string
+		switch op := ins.(type) {
+		case OpRange:
+			label = fmt.Sprintf("range %q %q", string(op.Start), string(op.End))
+		case OpString:
+			label = fmt.Sprintf("string %q", op.Value)
+		case OpFork:
+			label = fmt.Sprintf("fork %d", i+op.N)
+			fmt.Fprintf(buf, "%d -> %d;", i, i+op.N)
+		case OpJmp:
+			label = fmt.Sprintf("jmp %d", i+op.N)
+			fmt.Fprintf(buf, "%d -> %d;", i, i+op.N)
+		case OpCapture:
+			//start := "start"
+			//if !op.Start {
+			//start = "end"
+			//}
+			//fmt.Printf("capture %s %s", start, op.Name)
+		case OpMatch:
+			label = fmt.Sprintf("match")
+		case OpFunc:
+			label = fmt.Sprintf("func %s", op.Name)
+			//indent++
+		case OpCall:
+			label = fmt.Sprintf("call %s", op.Name)
+			fmt.Fprintf(buf, "%d -> %d;", i, callPC(p, op))
+		case OpReturn:
+			label = fmt.Sprintf("return")
+		default:
+			panic("unreachable")
+		}
+		label = fmt.Sprintf("[%d] %s", i, label)
+		fmt.Fprintf(buf, "%d[label=%q];", i, label)
+		if i > 0 {
+			fmt.Fprintf(buf, "%d -> %d;", i-1, i)
+		}
+		//fmt.Print("\n")
+	}
+	fmt.Fprintf(buf, "}\n")
+	return buf.Bytes()
+}
+
+func Print(p []Ins) {
+	indent := 0
+	for i, ins := range p {
+		if _, ok := ins.(OpReturn); ok {
+			indent--
+		}
+		fmt.Printf("% 3d: %s", i, strings.Repeat("  ", indent))
 		switch op := ins.(type) {
 		case OpRange:
 			fmt.Printf("range %q %q", string(op.Start), string(op.End))
 		case OpString:
 			fmt.Printf("string %q", op.Value)
-		case OpSplit:
-			fmt.Printf("split %d %d", i+op.A, i+op.B)
+		case OpFork:
+			fmt.Printf("fork %d", i+op.N)
 		case OpJmp:
 			fmt.Printf("jmp %d", i+op.N)
 		case OpCapture:
@@ -225,6 +344,13 @@ func Print(p []Ins) {
 			fmt.Printf("capture %s %s", start, op.Name)
 		case OpMatch:
 			fmt.Printf("match")
+		case OpFunc:
+			fmt.Printf("func %s", op.Name)
+			indent++
+		case OpCall:
+			fmt.Printf("call %s", op.Name)
+		case OpReturn:
+			fmt.Printf("return")
 		default:
 			panic("unreachable")
 		}

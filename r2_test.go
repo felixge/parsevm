@@ -2,6 +2,7 @@ package r2
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"testing"
 )
@@ -100,6 +101,121 @@ func TestMatch(t *testing.T) {
 	}
 }
 
+func TestRecursive(t *testing.T) {
+	value := Func("value", Alt(Alt(Alt(Call("number"), Call("array")), Call("object")), Call("string")))
+
+	object := Func("object", Concat(
+		String("{"),
+		Alt(Call("ws"), Call("members")),
+		String("}"),
+	))
+
+	members := Func("members", Alt(
+		Call("member"),
+		Concat(Call("member"), String(","), Call("members")),
+	))
+
+	member := Func("member", Concat(
+		Call("ws"),
+		Call("string"),
+		Call("ws"),
+		String(":"),
+		Call("element"),
+	))
+
+	array := Func("array", Concat(
+		String("["),
+		Alt(Call("ws"), Call("elements")),
+		String("]"),
+	))
+
+	elements := Func("elements", Alt(
+		Call("element"),
+		Concat(Call("element"), String(","), Call("elements")),
+	))
+
+	element := Func("element", Concat(Call("ws"), Call("value"), Call("ws")))
+
+	str := Func("string", Concat(
+		String(`"`),
+		Star(Range('a', 'z')),
+		String(`"`),
+	))
+
+	number := Func("number", Range('0', '9'))
+
+	// TODO more convenient Alt
+	ws := Func("ws", Alt(Alt(Alt(Alt(
+		String(""),
+		Concat(String("\r"), Call("ws"))),
+		Concat(String("\n"), Call("ws"))),
+		Concat(String("\t"), Call("ws"))),
+		Concat(String(" "), Call("ws"))),
+	)
+	p := Concat(
+		Call("element"),
+		Match(nil),
+		value,
+		object,
+		members,
+		member,
+		array,
+		elements,
+		element,
+		str,
+		number,
+		ws,
+	)
+	Print(p)
+	dot := Graphviz(p)
+	if err := ioutil.WriteFile("json.dot", dot, 0666); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		`"foo"`,
+		`""`,
+
+		"[]",
+		"[1]",
+		"[1,2]",
+		"[1, 2]",
+		"[1,2,3]",
+		"[[]]",
+		"[[1]]",
+		"[[1,2]]",
+		"[[1,2,3]]",
+		"[[],4]",
+		"[[1],4]",
+		"[[1,2],4]",
+		"[[1,2,3],4]",
+		"[[[]]]",
+
+		`{}`,
+		`{ }`,
+		`{"a":"b"}`,
+		`{"a": "b"}`,
+		`{"a":"b","c":"d"}`,
+		`{"a": "b", "c": "d"}`,
+		`{"a": "b", "c": {"d": "e"}}`,
+	}
+	for _, test := range tests {
+		t.Run(test, func(t *testing.T) {
+			thr := Run(test, p)
+			if thr == nil {
+				t.Fail()
+			}
+		})
+	}
+
+	//Match(Func("array", Concat(String("[")
+
+	//p := Match(Func("foo", Concat(String("("), Alt(Call("foo"), String("bar")), String(")"))))
+	//Print(p)
+	//thread := Run(`(((bar)))`, p)
+	//fmt.Printf("%#v\n", thread)
+}
+
 func TestJSON(t *testing.T) {
 	t.Skip()
 	whitespace := Star(Alt(Alt(Alt(
@@ -118,8 +234,8 @@ func TestJSON(t *testing.T) {
 		Capture("string", Star(Range('a', 'z'))),
 		String(`"`),
 	))
-	num := token(Capture("number", Plus(Range('0', '9'))))
-	val := Alt(str, num)
+	number := token(Capture("number", Plus(Range('0', '9'))))
+	val := Alt(str, number)
 	pair := Concat(
 		Capture("key", str),
 		String(":"),
