@@ -1,4 +1,4 @@
-package r2
+package parsevm
 
 import (
 	"fmt"
