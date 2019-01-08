@@ -192,7 +192,7 @@ func compileABNF() []pvm.Ins {
 
 	define("DQUOTE", pvm.String("\x22"))
 
-	define("HEXDIGIT", pvm.Alt(
+	define("HEXDIG", pvm.Alt(
 		pvm.Call("DIGIT"),
 		pvm.String("A"),
 		pvm.String("B"),
@@ -222,11 +222,12 @@ func compileABNF() []pvm.Ins {
 		pvm.Call("HTAB"),
 	))
 
-	return pvm.Concat(pvm.Concat(pvm.Call("rulelist"), pvm.Match(nil)), p)
+	final := pvm.Concat(pvm.Concat(pvm.Call("rulelist"), pvm.Match(nil)), p)
+	return pvm.Optimize(final)
 }
 
 func Validate(s string) bool {
-	//pvm.Print(abnf)
+	pvm.Print(abnf)
 	t := pvm.Run(s, abnf)
 	return t != nil
 }
