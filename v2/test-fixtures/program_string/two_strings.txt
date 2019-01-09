@@ -1,0 +1,2 @@
+0: string "hello"
+1: string "world"
