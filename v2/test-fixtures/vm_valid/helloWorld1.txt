@@ -1,0 +1,54 @@
+# Program "helloWorld1"
+
+```
+0: string "hello world"
+```
+
+## Input 1
+
+```
+hello world
+```
+```
+n=11 err=<nil> valid=true
+````
+## Input 2
+
+```
+world hello
+```
+```
+n=0 err=short write valid=false
+````
+## Input 3
+
+```
+helloworld
+```
+```
+n=10 err=<nil> valid=false
+````
+## Input 4
+
+```
+hhello world
+```
+```
+n=12 err=<nil> valid=true
+````
+## Input 5
+
+```
+
+```
+```
+n=0 err=<nil> valid=false
+````
+## Input 6
+
+```
+hello
+```
+```
+n=5 err=<nil> valid=false
+````
