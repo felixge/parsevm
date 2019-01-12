@@ -28,33 +28,39 @@
 |---------|-------|---|-------|-----|-------|
 | abc1    | true  | 0 | <nil> |   1 |     1 |
 | abc2    | true  | 0 | <nil> |   1 |     1 |
+
 ## Input 2: "abc"
 
 | PROGRAM | VALID | N |  ERR  | OPS | FORKS |
 |---------|-------|---|-------|-----|-------|
 | abc1    | true  | 3 | <nil> |   6 |     2 |
 | abc2    | true  | 3 | <nil> |   6 |     2 |
+
 ## Input 3: "abcabc"
 
 | PROGRAM | VALID | N |  ERR  | OPS | FORKS |
 |---------|-------|---|-------|-----|-------|
 | abc1    | true  | 6 | <nil> |  11 |     3 |
 | abc2    | true  | 6 | <nil> |  11 |     3 |
+
 ## Input 4: "abcabcabc"
 
 | PROGRAM | VALID | N |  ERR  | OPS | FORKS |
 |---------|-------|---|-------|-----|-------|
 | abc1    | true  | 9 | <nil> |  16 |     4 |
 | abc2    | true  | 9 | <nil> |  16 |     4 |
+
 ## Input 5: "ab"
 
 | PROGRAM | VALID | N |  ERR  | OPS | FORKS |
 |---------|-------|---|-------|-----|-------|
 | abc1    | false | 2 | <nil> |   3 |     1 |
 | abc2    | false | 2 | <nil> |   3 |     1 |
+
 ## Input 6: "def"
 
 | PROGRAM | VALID | N |     ERR     | OPS | FORKS |
 |---------|-------|---|-------------|-----|-------|
 | abc1    | false | 0 | short write |   2 |     1 |
 | abc2    | false | 0 | short write |   2 |     1 |
+
