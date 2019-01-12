@@ -163,7 +163,7 @@ func TestVM_Complexity(t *testing.T) {
 	var table [][]string
 	table = append(table, []string{"n", "err", "ops", "forks"})
 
-	max := 15
+	max := 30
 	for n := 1; n <= max; n++ {
 		var p Program
 		input := strings.Repeat("a", n)
