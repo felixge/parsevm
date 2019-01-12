@@ -25,52 +25,43 @@ func (v *VM) Write(data []byte) (int, error) {
 		var nextThreads []*thread
 		v.pcs = map[int]struct{}{}
 
-	currentThreads:
 		for i := 0; i < len(v.threads); i++ {
+			v.stats.Ops++
 			t := v.threads[i]
-			// Execute the thread until it consumes c or dies.
-			for {
-				v.stats.Ops++
-
-				// If the thread is already at the end of the program, an additional
-				// char will kill it.
-				if t.pc >= len(t.p) {
-					continue currentThreads
-				}
-
-				op := t.p[t.pc]
-				switch opT := op.(type) {
-				case OpString:
-					// If char doesn't match, kill this thread.
-					if opT.Value[t.oc] != c {
-						continue currentThreads
-					}
-
-					// Increment our op counter (offset) into this string.
-					t.oc++
-					if t.oc == len(opT.Value) {
-						// We're done matching the string, move on to the next op and
-						// reset our op counter (offset).
-						t.pc++
-						t.oc = 0
-					}
-
-					nextThreads = v.addThread(nextThreads, t)
-					v.pcs[t.pc] = struct{}{}
-					continue currentThreads
-				case OpRange:
-					if c < opT.Start || c > opT.End {
-						continue currentThreads
-					}
-
-					t.pc++
-					nextThreads = v.addThread(nextThreads, t)
-					v.pcs[t.pc] = struct{}{}
-					continue currentThreads
-				default:
-					return v.n + i, fmt.Errorf("unknown op: %s", op)
-				}
+			// If the thread is already at the end of the program, an additional
+			// char will kill it.
+			if t.pc >= len(t.p) {
+				continue
 			}
+
+			op := t.p[t.pc]
+			switch opT := op.(type) {
+			case OpString:
+				// If char doesn't match, kill this thread.
+				if opT.Value[t.oc] != c {
+					continue
+				}
+
+				// Increment our op counter (offset) into this string.
+				t.oc++
+				if t.oc == len(opT.Value) {
+					// We're done matching the string, move on to the next op and
+					// reset our op counter (offset).
+					t.pc++
+					t.oc = 0
+				}
+			case OpRange:
+				if c < opT.Start || c > opT.End {
+					continue
+				}
+
+				t.pc++
+			default:
+				return v.n + i, fmt.Errorf("unknown op: %s", op)
+			}
+
+			nextThreads = v.addThread(nextThreads, t)
+			v.pcs[t.pc] = struct{}{}
 		}
 
 		v.threads = nextThreads
