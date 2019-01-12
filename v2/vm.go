@@ -88,6 +88,7 @@ loop:
 		v.stats.Ops++
 	}
 	for _, existingT := range threads {
+		v.stats.Ops++
 		if existingT.pc == t.pc {
 			return threads
 		}
