@@ -71,3 +71,14 @@ func Alt(alts ...Program) Program {
 	}
 	return a
 }
+
+func Repeat(min, max int, p Program) Program {
+	var newP Program
+	for i := 0; i < min; i++ {
+		newP = Concat(newP, p)
+	}
+	for i := 0; i < max-min; i++ {
+		newP = Concat(newP, ZeroOrOne(p))
+	}
+	return newP
+}
