@@ -3,7 +3,9 @@ package vm
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -156,27 +158,46 @@ func TestVM_Valid(t *testing.T) {
 	}
 }
 
-// func TestRussCox(t *testing.T) {
-// 	buf := &bytes.Buffer{}
-// 	for n := 1; n <= 30; n++ {
-// 		var p Program
-// 		input := strings.Repeat("a", n)
-// 		for i := 0; i < n; i++ {
-// 			p = Concat(p, ZeroOrOne(String("a")))
-// 		}
-// 		for i := 0; i < n; i++ {
-// 			p = Concat(p, String("a"))
-// 		}
-// 		start := time.Now()
-// 		v := NewVM(p)
-// 		v.Write([]byte(input))
-// 		if !v.Valid() {
-// 			t.Fatal("invalid")
-// 		}
+func TestVM_Complexity(t *testing.T) {
+	buf := &bytes.Buffer{}
+	var table [][]string
+	table = append(table, []string{"n", "err", "ops", "forks"})
 
-// 		fmt.Printf("%s\n", time.Since(start))
-// 	}
-// }
+	max := 15
+	for n := 1; n <= max; n++ {
+		var p Program
+		input := strings.Repeat("a", n)
+		for i := 0; i < n; i++ {
+			p = Concat(p, ZeroOrOne(String("a")))
+		}
+		for i := 0; i < n; i++ {
+			p = Concat(p, String("a"))
+		}
+
+		if n == max {
+			fmt.Fprintf(buf, "# Program\n\n```\n%s```\n\n", p)
+		}
+
+		start := time.Now()
+		v := NewVM(p)
+		n, err := v.Write([]byte(input))
+		if !v.Valid() {
+			t.Fatal("invalid")
+		}
+		stats := v.Stats()
+
+		table = append(table, []string{
+			fmt.Sprintf("%d", n),
+			fmt.Sprintf("%v", err),
+			fmt.Sprintf("%d", stats.Ops),
+			fmt.Sprintf("%d", stats.Forks),
+		})
+		fmt.Printf("%s\n", time.Since(start))
+	}
+
+	fmt.Fprintf(buf, "# Complexities\n\n%s\n", markdownTable(table))
+	gc.GoldenFixture(buf.Bytes(), "vm_complexity.md")
+}
 
 func markdownTable(data [][]string) string {
 	buf := &bytes.Buffer{}
