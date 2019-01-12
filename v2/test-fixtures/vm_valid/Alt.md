@@ -5,28 +5,28 @@
 ### Program abcdefghj1
 
 ```
-0: fork +6
-1: fork +3
+0: fork 6
+1: fork 4
 2: string "abc"
-3: jmp +2
+3: jump 5
 4: string "def"
-5: jmp +2
+5: jump 7
 6: string "ghi"
 ```
 
 ### Program abcdefghi2
 
 ```
- 0: fork +8
- 1: fork +4
- 2: string "a"
- 3: string "bc"
- 4: jmp +3
- 5: string "de"
- 6: string "f"
- 7: jmp +4
- 8: string "g"
- 9: string "h"
+0: fork 8
+1: fork 5
+2: string "a"
+3: string "bc"
+4: jump 7
+5: string "de"
+6: string "f"
+7: jump 11
+8: string "g"
+9: string "h"
 10: string "i"
 ```
 

@@ -107,6 +107,23 @@ func TestVM_Valid(t *testing.T) {
 				"adg",
 			},
 		},
+
+		{
+			"Repeat",
+			[]testProgram{
+				{"abc1", Repeat(1, 3, String("abc"))},
+				{"abc3", Repeat(1, 3, Concat(String("a"), String("b"), String("c")))},
+			},
+			[]string{
+				"",
+				"ab",
+				"abc",
+				"abcabc",
+				"abcabcabc",
+				"abcabcabcabc",
+				"adcd",
+			},
+		},
 	}
 
 	gf := gc.GoldenFixtures("vm_valid")

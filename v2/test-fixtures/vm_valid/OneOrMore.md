@@ -6,7 +6,7 @@
 
 ```
 0: string "abc"
-1: fork -1
+1: fork 0
 ```
 
 ### Program abc2
@@ -15,7 +15,7 @@
 0: string "a"
 1: string "b"
 2: string "c"
-3: fork -3
+3: fork 0
 ```
 
 ## Inputs

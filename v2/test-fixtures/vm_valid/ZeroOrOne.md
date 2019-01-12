@@ -5,14 +5,14 @@
 ### Program abc1
 
 ```
-0: fork +2
+0: fork 2
 1: string "abc"
 ```
 
 ### Program abc2
 
 ```
-0: fork +4
+0: fork 4
 1: string "a"
 2: string "b"
 3: string "c"

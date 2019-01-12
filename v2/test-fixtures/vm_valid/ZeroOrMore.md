@@ -5,19 +5,19 @@
 ### Program abc1
 
 ```
-0: fork +3
+0: fork 3
 1: string "abc"
-2: jmp -2
+2: jump 0
 ```
 
 ### Program abc2
 
 ```
-0: fork +5
+0: fork 5
 1: string "a"
 2: string "b"
 3: string "c"
-4: jmp -4
+4: jump 0
 ```
 
 ## Inputs
