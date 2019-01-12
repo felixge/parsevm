@@ -36,41 +36,41 @@
 
 |  PROGRAM   | VALID | N |  ERR  | OPS | FORKS |
 |------------|-------|---|-------|-----|-------|
-| abcdefghj1 | false | 0 | <nil> |   2 |     2 |
-| abcdefghi2 | false | 0 | <nil> |   2 |     2 |
+| abcdefghj1 | false | 0 | <nil> |   8 |     2 |
+| abcdefghi2 | false | 0 | <nil> |   8 |     2 |
 
 ## Input 2: "abc"
 
 |  PROGRAM   | VALID | N |  ERR  | OPS | FORKS |
 |------------|-------|---|-------|-----|-------|
-| abcdefghj1 | true  | 3 | <nil> |   9 |     2 |
-| abcdefghi2 | true  | 3 | <nil> |   9 |     2 |
+| abcdefghj1 | true  | 3 | <nil> |  15 |     2 |
+| abcdefghi2 | true  | 3 | <nil> |  15 |     2 |
 
 ## Input 3: "def"
 
 |  PROGRAM   | VALID | N |  ERR  | OPS | FORKS |
 |------------|-------|---|-------|-----|-------|
-| abcdefghj1 | true  | 3 | <nil> |   8 |     2 |
-| abcdefghi2 | true  | 3 | <nil> |   8 |     2 |
+| abcdefghj1 | true  | 3 | <nil> |  14 |     2 |
+| abcdefghi2 | true  | 3 | <nil> |  14 |     2 |
 
 ## Input 4: "ghi"
 
 |  PROGRAM   | VALID | N |  ERR  | OPS | FORKS |
 |------------|-------|---|-------|-----|-------|
-| abcdefghj1 | true  | 3 | <nil> |   7 |     2 |
-| abcdefghi2 | true  | 3 | <nil> |   7 |     2 |
+| abcdefghj1 | true  | 3 | <nil> |  13 |     2 |
+| abcdefghi2 | true  | 3 | <nil> |  13 |     2 |
 
 ## Input 5: "abcabc"
 
 |  PROGRAM   | VALID | N |     ERR     | OPS | FORKS |
 |------------|-------|---|-------------|-----|-------|
-| abcdefghj1 | false | 3 | short write |   9 |     2 |
-| abcdefghi2 | false | 3 | short write |   9 |     2 |
+| abcdefghj1 | false | 3 | short write |  15 |     2 |
+| abcdefghi2 | false | 3 | short write |  15 |     2 |
 
 ## Input 6: "adg"
 
 |  PROGRAM   | VALID | N |     ERR     | OPS | FORKS |
 |------------|-------|---|-------------|-----|-------|
-| abcdefghj1 | false | 1 | short write |   6 |     2 |
-| abcdefghi2 | false | 1 | short write |   6 |     2 |
+| abcdefghj1 | false | 1 | short write |  10 |     2 |
+| abcdefghi2 | false | 1 | short write |  10 |     2 |
 

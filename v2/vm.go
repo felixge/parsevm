@@ -17,16 +17,21 @@ type VM struct {
 	// threads is the list of active threads
 	threads []*thread
 	stats   Stats
+	pcs     map[int]struct{}
 }
 
 func (v *VM) Write(data []byte) (int, error) {
 	for i, c := range data {
 		var nextThreads []*thread
+		v.pcs = map[int]struct{}{}
+
 	currentThreads:
 		for i := 0; i < len(v.threads); i++ {
 			t := v.threads[i]
 			// Execute the thread until it consumes c or dies.
 			for {
+				v.stats.Ops++
+
 				// If the thread is already at the end of the program, an additional
 				// char will kill it.
 				if t.pc >= len(t.p) {
@@ -34,7 +39,6 @@ func (v *VM) Write(data []byte) (int, error) {
 				}
 
 				op := t.p[t.pc]
-				v.stats.Ops++
 				switch opT := op.(type) {
 				case OpString:
 					// If char doesn't match, kill this thread.
@@ -52,6 +56,7 @@ func (v *VM) Write(data []byte) (int, error) {
 					}
 
 					nextThreads = v.addThread(nextThreads, t)
+					v.pcs[t.pc] = struct{}{}
 					continue currentThreads
 				default:
 					return v.n + i, fmt.Errorf("unknown op: %s", op)
@@ -60,6 +65,7 @@ func (v *VM) Write(data []byte) (int, error) {
 		}
 
 		v.threads = nextThreads
+
 		if len(nextThreads) == 0 {
 			return v.n + i, io.ErrShortWrite
 		}
@@ -72,8 +78,8 @@ func (v *VM) Write(data []byte) (int, error) {
 func (v *VM) addThread(threads []*thread, t *thread) []*thread {
 loop:
 	for t.pc < len(t.p) {
+		v.stats.Ops++
 		op := t.p[t.pc]
-
 		switch opT := op.(type) {
 		case OpFork:
 			fork := &thread{p: t.p, pc: t.pc + opT.PC}
@@ -85,19 +91,19 @@ loop:
 		default:
 			break loop
 		}
-		v.stats.Ops++
 	}
-	for _, existingT := range threads {
-		v.stats.Ops++
-		if existingT.pc == t.pc {
-			return threads
-		}
+
+	if _, ok := v.pcs[t.pc]; ok {
+		return threads
 	}
+
 	return append(threads, t)
 }
 
 func (v *VM) Valid() bool {
 	for _, t := range v.threads {
+		v.stats.Ops++
+
 		if t.pc == len(t.p) {
 			return true
 		}
