@@ -2,9 +2,9 @@ package parsevm
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestMatch(t *testing.T) {
@@ -19,7 +19,7 @@ func TestMatch(t *testing.T) {
 
 	tests := []struct {
 		Name    string
-		Program []Ins
+		Program Program
 		Input   string
 		Want    bool
 	}{
@@ -93,6 +93,7 @@ func TestMatch(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		vm := NewVM(test.Program)
 		//Print(test.Program)
 		got := Run(test.Input, test.Program) != nil
 		if got != test.Want {
@@ -101,174 +102,22 @@ func TestMatch(t *testing.T) {
 	}
 }
 
-func TestRecursive(t *testing.T) {
-	value := Func("value", Alt(Alt(Alt(Call("number"), Call("array")), Call("object")), Call("string")))
-
-	object := Func("object", Concat(
-		String("{"),
-		Alt(Call("ws"), Call("members")),
-		String("}"),
-	))
-
-	members := Func("members", Alt(
-		Call("member"),
-		Concat(Call("member"), String(","), Call("members")),
-	))
-
-	member := Func("member", Concat(
-		Call("ws"),
-		Call("string"),
-		Call("ws"),
-		String(":"),
-		Call("element"),
-	))
-
-	array := Func("array", Concat(
-		String("["),
-		Alt(Call("ws"), Call("elements")),
-		String("]"),
-	))
-
-	elements := Func("elements", Alt(
-		Call("element"),
-		Concat(Call("element"), String(","), Call("elements")),
-	))
-
-	element := Func("element", Concat(Call("ws"), Call("value"), Call("ws")))
-
-	str := Func("string", Concat(
-		String(`"`),
-		Star(Range('a', 'z')),
-		String(`"`),
-	))
-
-	number := Func("number", Range('0', '9'))
-
-	// TODO more convenient Alt
-	ws := Func("ws", Alt(Alt(Alt(Alt(
-		String(""),
-		Concat(String("\r"), Call("ws"))),
-		Concat(String("\n"), Call("ws"))),
-		Concat(String("\t"), Call("ws"))),
-		Concat(String(" "), Call("ws"))),
-	)
-	p := Concat(
-		Call("element"),
-		Match(nil),
-		value,
-		object,
-		members,
-		member,
-		array,
-		elements,
-		element,
-		str,
-		number,
-		ws,
-	)
-	Print(p)
-	dot := Graphviz(p)
-	if err := ioutil.WriteFile("json.dot", dot, 0666); err != nil {
-		t.Fatal(err)
-	}
-
-	tests := []string{
-		`"foo"`,
-		`""`,
-
-		"[]",
-		"[1]",
-		"[1,2]",
-		"[1, 2]",
-		"[1,2,3]",
-		"[[]]",
-		"[[1]]",
-		"[[1,2]]",
-		"[[1,2,3]]",
-		"[[],4]",
-		"[[1],4]",
-		"[[1,2],4]",
-		"[[1,2,3],4]",
-		"[[[]]]",
-
-		`{}`,
-		`{ }`,
-		`{"a":"b"}`,
-		`{"a": "b"}`,
-		`{"a":"b","c":"d"}`,
-		`{"a": "b", "c": "d"}`,
-		`{"a": "b", "c": {"d": "e"}}`,
-	}
-	for _, test := range tests {
-		t.Run(test, func(t *testing.T) {
-			thr := Run(test, p)
-			if thr == nil {
-				t.Fail()
-			}
-		})
-	}
-
-	//Match(Func("array", Concat(String("[")
-
-	//p := Match(Func("foo", Concat(String("("), Alt(Call("foo"), String("bar")), String(")"))))
-	//Print(p)
-	//thread := Run(`(((bar)))`, p)
-	//fmt.Printf("%#v\n", thread)
-}
-
-func TestJSON(t *testing.T) {
-	t.Skip()
-	whitespace := Star(Alt(Alt(Alt(
-		String(" "),
-		String("\n"),
-	), String("\t")),
-		String("\r"),
-	))
-
-	token := func(p []Ins) []Ins {
-		return append(append(whitespace, p...), whitespace...)
-	}
-
-	str := token(Concat(
-		String(`"`),
-		Capture("string", Star(Range('a', 'z'))),
-		String(`"`),
-	))
-	number := token(Capture("number", Plus(Range('0', '9'))))
-	val := Alt(str, number)
-	pair := Concat(
-		Capture("key", str),
-		String(":"),
-		Capture("value", val),
-	)
-	object := token(Capture("object", Concat(
-		String("{"),
-		Alt(
-			Concat(
-				Plus(Concat(pair, Concat(String(",")))),
-				pair,
-			),
-			Repeat(0, 1, pair),
-		),
-		String("}"),
-	)))
-	doc := Star(object)
-	p := Match(doc)
-	Print(p)
-
-	tests := []string{
-		`{}`,
-		`{"foo": "bar"}`,
-		`{"foo": 123}`,
-		`{"foo": "bar", "hello": "world"}`,
-		`{"foo": "bar", {"hello": "world"}}`,
-	}
-	for _, test := range tests {
-		a := Run(test, p)
-		fmt.Printf("%s:\n", test)
-		for _, c := range a.Captures {
-			fmt.Printf("%s%s %s\n", strings.Repeat("  ", c.Depth), c.Name, c.Value)
+func TestRussCox(t *testing.T) {
+	for n := 1; n <= 30; n++ {
+		var p []Ins
+		input := strings.Repeat("a", n)
+		for i := 0; i < n; i++ {
+			p = Concat(p, QuestionMark(String("a")))
 		}
-		fmt.Printf("\n\n")
+		for i := 0; i < n; i++ {
+			p = Concat(p, String("a"))
+		}
+		p = Optimize(Match(p))
+		start := time.Now()
+		thr := Run(input, p)
+		if thr == nil {
+			t.Errorf("n=%d", n)
+		}
+		fmt.Printf("n=%d %s\n", n, time.Since(start))
 	}
 }

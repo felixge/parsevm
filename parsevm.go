@@ -15,7 +15,8 @@ type OpJmp struct {
 }
 
 type OpFork struct {
-	N int
+	N    int
+	Cond string
 }
 
 type OpString struct {
@@ -34,6 +35,7 @@ type OpCapture struct {
 
 type OpCall struct {
 	Name string
+	PC   int
 }
 
 type OpFunc struct {
@@ -52,6 +54,7 @@ type CaptureGroup struct {
 type Thread struct {
 	ID       int
 	S        string
+	I        int
 	P        []Ins
 	PC       int
 	Captures []CaptureGroup
@@ -64,42 +67,101 @@ func (t *Thread) Clone() *Thread {
 	copy(captures, t.Captures)
 	stack := make([]int, len(t.Stack))
 	copy(stack, t.Stack)
-	return &Thread{S: t.S, P: t.P, PC: t.PC, Captures: captures, Stack: stack}
+	return &Thread{S: t.S, I: t.I, P: t.P, PC: t.PC, Captures: captures, Stack: stack}
+}
+
+type Program []Ins
+
+func NewVM(p *Program) *VM {
+	return &VM{p: p}
+}
+
+type VM struct {
+	p *Program
+}
+
+func (v *VM) Write(data []byte) (int, error) {
+	return 0, nil
+}
+
+type Stats struct {
+	ThreadsExecuted int
+	ThreadsDeduped  int
+	ThreadsParallel int
+	Cycles          int
 }
 
 func Run(s string, p []Ins) *Thread {
 	threadID := 1
 	threads := []*Thread{{ID: threadID, P: p, S: s}}
+	var stats Stats
+
 	for len(threads) > 0 {
+		if l := len(threads); l > stats.ThreadsParallel {
+			stats.ThreadsParallel = l
+		}
+
 		newThreads := make([]*Thread, 0, len(threads))
+
 		for _, t := range threads {
 			children := t.next()
+			stats.Cycles++
+
+		childloop:
 			for _, child := range children {
+			dedupe:
+				for _, newThread := range newThreads {
+					if newThread.PC != child.PC || newThread.I != child.I || len(newThread.Stack) != len(child.Stack) {
+						continue dedupe
+					}
+					for i := range child.Stack {
+						if child.Stack[i] != newThread.Stack[i] {
+							continue dedupe
+						}
+					}
+					stats.ThreadsDeduped++
+					continue childloop
+				}
+
 				if child.ID == 0 {
 					threadID++
 					child.ID = threadID
 				}
 				if child.Match {
+					stats.ThreadsExecuted = threadID
+					fmt.Printf("%#v\n", stats)
 					return child
 				}
+				newThreads = append(newThreads, child)
 			}
-			newThreads = append(newThreads, children...)
 		}
 		threads = newThreads
 	}
+	stats.ThreadsExecuted = threadID
 	return nil
+}
+
+func DecodeStack(stack []int, p []Ins) []string {
+	d := make([]string, len(stack))
+	for i, pc := range stack {
+		d[i] = p[pc-1].(OpCall).Name
+	}
+	return d
 }
 
 func (t *Thread) next() []*Thread {
 	self := []*Thread{t}
 	op := t.P[t.PC]
-	//fmt.Printf("t=% 3d pc=% 3d % 20s %#v\n", t.ID, t.PC, t.S, op)
+	//fmt.Printf("t=% 3d pc=% 3d %#v\n", t.ID, t.PC, op)
 	switch op := op.(type) {
 	case OpFunc:
 		t.PC++
 		return self
 	case OpCall:
-		newPC := callPC(t.P, op)
+		newPC := op.PC
+		if newPC == -1 {
+			newPC = callPC(t.P, op)
+		}
 		if newPC == -1 {
 			panic(fmt.Sprintf("cannot call unkown func: %s", op.Name))
 		}
@@ -126,27 +188,27 @@ func (t *Thread) next() []*Thread {
 		}
 		return self
 	case OpRange:
-		if len(t.S) == 0 {
+		if len(t.S)-t.I == 0 {
 			return nil
-		} else if t.S[0] < op.Start || t.S[0] > op.End {
+		} else if t.S[t.I] < op.Start || t.S[t.I] > op.End {
 			return nil
 		}
 		t.PC++
-		t.capture(string(t.S[0]))
-		t.S = t.S[1:]
+		t.capture(string(t.S[t.I]))
+		t.I++
 		return self
 	case OpString:
-		if len(t.S) < len(op.Value) {
+		if len(t.S)-t.I < len(op.Value) {
 			return nil
-		} else if t.S[0:len(op.Value)] != op.Value {
+		} else if t.S[t.I:t.I+len(op.Value)] != op.Value {
 			return nil
 		}
 		t.PC++
 		t.capture(op.Value)
-		t.S = t.S[len(op.Value):]
+		t.I += len(op.Value)
 		return self
 	case OpMatch:
-		if len(t.S) == 0 {
+		if len(t.S)-t.I == 0 {
 			t.Match = true
 			return self
 		}
@@ -155,10 +217,14 @@ func (t *Thread) next() []*Thread {
 		t.PC += op.N
 		return self
 	case OpFork:
-		clone := t.Clone()
+		if strings.HasPrefix(t.S[t.I:], op.Cond) {
+			clone := t.Clone()
+			t.PC += 1
+			clone.PC += op.N
+			return append(self, clone)
+		}
 		t.PC += 1
-		clone.PC += op.N
-		return append(self, clone)
+		return self
 	}
 	panic(fmt.Sprintf("unknown op: %#v", op))
 }
@@ -219,24 +285,32 @@ func Concat(parts ...[]Ins) []Ins {
 	return newP
 }
 
-func Alt(a, b []Ins) []Ins {
-	fork := OpFork{len(a) + 2}
-	jmp := OpJmp{len(b) + 1}
-	return append(append(append([]Ins{fork}, a...), jmp), b...)
+func Alt(alts ...[]Ins) []Ins {
+	var a []Ins
+	for _, b := range alts {
+		if a == nil {
+			a = b
+			continue
+		}
+		fork := OpFork{N: len(a) + 2}
+		jmp := OpJmp{len(b) + 1}
+		a = append(append(append([]Ins{fork}, a...), jmp), b...)
+	}
+	return a
 }
 
 func Plus(p []Ins) []Ins {
-	return append(p, OpFork{-len(p)})
+	return append(p, OpFork{N: -len(p)})
 }
 
 func Star(p []Ins) []Ins {
-	fork := OpFork{len(p) + 2}
+	fork := OpFork{N: len(p) + 2}
 	jmp := OpJmp{-(len(p) + 1)}
 	return append(append([]Ins{fork}, p...), jmp)
 }
 
 func QuestionMark(p []Ins) []Ins {
-	fork := OpFork{len(p) + 1}
+	fork := OpFork{N: len(p) + 1}
 	return append([]Ins{fork}, p...)
 }
 
@@ -271,25 +345,33 @@ func Func(name string, ins []Ins) []Ins {
 }
 
 func Call(name string) []Ins {
-	return []Ins{OpCall{name}}
+	return []Ins{OpCall{Name: name, PC: -1}}
 }
 
 func Graphviz(p []Ins) []byte {
 	buf := bytes.NewBuffer(nil)
 	fmt.Fprintf(buf, "digraph g {\n")
+	var rows []string
+	var conns []string
 	for i, ins := range p {
+		row := []string{fmt.Sprintf("%d", i)}
 		var label string
 		switch op := ins.(type) {
 		case OpRange:
-			label = fmt.Sprintf("range %q %q", string(op.Start), string(op.End))
+			row = append(row, "range", string(op.Start), string(op.End))
+			//label = fmt.Sprintf("range %q %q", string(op.Start), string(op.End))
 		case OpString:
-			label = fmt.Sprintf("string %q", op.Value)
+			row = append(row, "string", op.Value)
+			//label = fmt.Sprintf("string %q", op.Value)
 		case OpFork:
-			label = fmt.Sprintf("fork %d", i+op.N)
-			fmt.Fprintf(buf, "%d -> %d;", i, i+op.N)
+			row = append(row, "fork", fmt.Sprintf("%d", i+op.N))
+			//label = fmt.Sprintf("fork %d", i+op.N)
+			//fmt.Fprintf(buf, "%d -> %d;", i, i+op.N)
 		case OpJmp:
-			label = fmt.Sprintf("jmp %d", i+op.N)
-			fmt.Fprintf(buf, "%d -> %d;", i, i+op.N)
+			row = append(row, "jmp", fmt.Sprintf("%d", i+op.N))
+			conns = append(conns, fmt.Sprintf("abc:%d:w -> abc:%d:w;", i, i+op.N))
+			//label = fmt.Sprintf("jmp %d", i+op.N)
+			//fmt.Fprintf(buf, "%d -> %d;", i, i+op.N)
 		case OpCapture:
 			//start := "start"
 			//if !op.Start {
@@ -297,25 +379,48 @@ func Graphviz(p []Ins) []byte {
 			//}
 			//fmt.Printf("capture %s %s", start, op.Name)
 		case OpMatch:
-			label = fmt.Sprintf("match")
+			row = append(row, "match")
+			//label = fmt.Sprintf("match")
 		case OpFunc:
-			label = fmt.Sprintf("func %s", op.Name)
+			row = append(row, "func", op.Name)
+			//label = fmt.Sprintf("func %s", op.Name)
 			//indent++
 		case OpCall:
-			label = fmt.Sprintf("call %s", op.Name)
-			fmt.Fprintf(buf, "%d -> %d;", i, callPC(p, op))
+			row = append(row, "call", op.Name)
+			//label = fmt.Sprintf("call %s", op.Name)
+			//conns = append(conns, fmt.Sprintf("abc:%d -> abc:%d;", i, callPC(p, op)))
 		case OpReturn:
-			label = fmt.Sprintf("return")
+			row = append(row, "return")
+			//label = fmt.Sprintf("return")
 		default:
 			panic("unreachable")
 		}
-		label = fmt.Sprintf("[%d] %s", i, label)
-		fmt.Fprintf(buf, "%d[label=%q];", i, label)
-		if i > 0 {
-			fmt.Fprintf(buf, "%d -> %d;", i-1, i)
+		//label = strings.Replace(label, "{", "", -1)
+		//label = strings.Replace(label, "}", "", -1)
+		//label = strings.Replace(label, `"`, "", -1)
+		//label = strings.Replace(label, `\`, "", -1)
+		//label = fmt.Sprintf("{ %d | %s}", i, label)
+		//label = fmt.Sprintf("{ %03d | %s}", i, label)
+		//label = strings.Replace(label, "}", "\\}", -1)
+		//label = strings.Replace(label, `"`, `\"`, -1)
+		for j, col := range row {
+			row[j] = fmt.Sprintf(`<TD port="%d" align="left">%s</TD>`, i, col)
 		}
-		//fmt.Print("\n")
+		label = `<TR>` + strings.Join(row, "") + `</TR>`
+		rows = append(rows, label)
+		//label = fmt.Sprintf("[%d] %s", i, label)
+		//fmt.Fprintf(buf, "%d[label=%q];", i, label)
+		//if i > 0 {
+		//fmt.Fprintf(buf, "%d -> %d;", i-1, i)
+		//}
 	}
+	fmt.Fprintf(buf, `
+	abc [shape=none, margin=0, label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+%s
+</TABLE>>];
+%s
+`, strings.Join(rows, "\n"), strings.Join(conns, "\n"))
 	fmt.Fprintf(buf, "}\n")
 	return buf.Bytes()
 }
@@ -333,7 +438,7 @@ func Print(p []Ins) {
 		case OpString:
 			fmt.Printf("string %q", op.Value)
 		case OpFork:
-			fmt.Printf("fork %d", i+op.N)
+			fmt.Printf("fork %d %q", i+op.N, op.Cond)
 		case OpJmp:
 			fmt.Printf("jmp %d", i+op.N)
 		case OpCapture:
@@ -348,7 +453,7 @@ func Print(p []Ins) {
 			fmt.Printf("func %s", op.Name)
 			indent++
 		case OpCall:
-			fmt.Printf("call %s", op.Name)
+			fmt.Printf("call %s %d", op.Name, op.PC)
 		case OpReturn:
 			fmt.Printf("return")
 		default:
@@ -356,4 +461,34 @@ func Print(p []Ins) {
 		}
 		fmt.Print("\n")
 	}
+}
+
+func Optimize(p []Ins) []Ins {
+	for i, ins := range p {
+		switch op := ins.(type) {
+		case OpFork:
+			p[i] = optimizeFork(i+op.N, op, p)
+		case OpCall:
+			op.PC = callPC(p, op)
+			p[i] = op
+		}
+	}
+	return p
+}
+
+func optimizeFork(pc int, fork OpFork, p []Ins) OpFork {
+	for pc < len(p) {
+		switch op := p[pc].(type) {
+		case OpString:
+			fork.Cond = op.Value
+			return fork
+		case OpCall:
+			pc = callPC(p, op)
+		case OpFunc:
+			pc++
+		default:
+			return fork
+		}
+	}
+	return fork
 }
