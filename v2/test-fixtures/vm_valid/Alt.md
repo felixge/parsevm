@@ -17,16 +17,16 @@
 ### Program abcdefghi2
 
 ```
-0: fork 8
-1: fork 5
-2: string "a"
-3: string "bc"
-4: jump 7
-5: string "de"
-6: string "f"
-7: jump 11
-8: string "g"
-9: string "h"
+ 0: fork 8
+ 1: fork 5
+ 2: string "a"
+ 3: string "bc"
+ 4: jump 7
+ 5: string "de"
+ 6: string "f"
+ 7: jump 11
+ 8: string "g"
+ 9: string "h"
 10: string "i"
 ```
 

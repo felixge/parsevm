@@ -15,16 +15,16 @@
 ### Program abc3
 
 ```
-0: string "a"
-1: string "b"
-2: string "c"
-3: fork 7
-4: string "a"
-5: string "b"
-6: string "c"
-7: fork 11
-8: string "a"
-9: string "b"
+ 0: string "a"
+ 1: string "b"
+ 2: string "c"
+ 3: fork 7
+ 4: string "a"
+ 5: string "b"
+ 6: string "c"
+ 7: fork 11
+ 8: string "a"
+ 9: string "b"
 10: string "c"
 ```
 

@@ -1,16 +1,16 @@
 # Program
 
 ```
-0: fork 2
-1: string "a"
-2: fork 4
-3: string "a"
-4: fork 6
-5: string "a"
-6: fork 8
-7: string "a"
-8: fork 10
-9: string "a"
+ 0: fork 2
+ 1: string "a"
+ 2: fork 4
+ 3: string "a"
+ 4: fork 6
+ 5: string "a"
+ 6: fork 8
+ 7: string "a"
+ 8: fork 10
+ 9: string "a"
 10: fork 12
 11: string "a"
 12: fork 14

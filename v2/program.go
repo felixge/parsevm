@@ -11,8 +11,7 @@ type Program []Op
 // TODO show fork/jmp with absolute pc
 func (p Program) String() string {
 	buf := &strings.Builder{}
-	prefix := fmt.Sprintf("%%%dd: ", int(math.Log10(float64(len(p)))))
-	fmt.Println(prefix)
+	prefix := fmt.Sprintf("%%%dd: ", int(1+math.Log10(float64(len(p)))))
 	for pc, op := range p {
 		fmt.Fprintf(buf, prefix, pc)
 		switch opT := op.(type) {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -152,7 +151,6 @@ func TestVM_Valid(t *testing.T) {
 						n, err := vm.Write([]byte(input))
 						valid := vm.Valid()
 						stats := vm.Stats()
-						fmt.Printf("%d\n", len(vm.threads))
 
 						table = append(table, []string{
 							program.Name,
@@ -195,7 +193,6 @@ func TestVM_Complexity(t *testing.T) {
 			fmt.Fprintf(buf, "# Program\n\n```\n%s```\n\n", p)
 		}
 
-		start := time.Now()
 		v := NewVM(p)
 		n, err := v.Write([]byte(input))
 		if !v.Valid() {
@@ -209,7 +206,6 @@ func TestVM_Complexity(t *testing.T) {
 			fmt.Sprintf("%d", stats.Ops),
 			fmt.Sprintf("%d", stats.Forks),
 		})
-		fmt.Printf("%s\n", time.Since(start))
 	}
 
 	fmt.Fprintf(buf, "# Complexities\n\n%s\n", markdownTable(table))
