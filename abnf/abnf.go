@@ -227,7 +227,6 @@ func compileABNF() []pvm.Ins {
 }
 
 func Validate(s string) bool {
-	pvm.Print(abnf)
 	t := pvm.Run(s, abnf)
 	return t != nil
 }
