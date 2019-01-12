@@ -21,6 +21,8 @@ func (p Program) String() string {
 			fmt.Fprintf(buf, "jump %d", opT.PC+pc)
 		case OpFork:
 			fmt.Fprintf(buf, "fork %d", opT.PC+pc)
+		case OpRange:
+			fmt.Fprintf(buf, "range %q %q", string(opT.Start), string(opT.End))
 		default:
 			panic(fmt.Errorf("unknown op: %#v", opT))
 		}
@@ -80,4 +82,8 @@ func Repeat(min, max int, p Program) Program {
 		newP = Concat(newP, ZeroOrOne(p))
 	}
 	return newP
+}
+
+func Range(start byte, end byte) Program {
+	return Program{OpRange{Start: start, End: end}}
 }

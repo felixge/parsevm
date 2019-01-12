@@ -40,6 +40,27 @@ func TestVM_Valid(t *testing.T) {
 		},
 
 		{
+			"Range",
+			[]testProgram{
+				{"b-d1", Range('b', 'd')},
+				{"b-d2", Alt(String("b"), Range('c', 'd'))},
+				{"b-d3", Alt(String("b"), String("c"), String("d"))},
+			},
+			[]string{
+				"a",
+				"b",
+				"c",
+				"d",
+				"e",
+				"ab",
+				"bb",
+				"cc",
+				"dd",
+				"ec",
+			},
+		},
+
+		{
 			"ZeroOrMore",
 			[]testProgram{
 				{"abc1", ZeroOrMore(String("abc"))},

@@ -58,6 +58,15 @@ func (v *VM) Write(data []byte) (int, error) {
 					nextThreads = v.addThread(nextThreads, t)
 					v.pcs[t.pc] = struct{}{}
 					continue currentThreads
+				case OpRange:
+					if c < opT.Start || c > opT.End {
+						continue currentThreads
+					}
+
+					t.pc++
+					nextThreads = v.addThread(nextThreads, t)
+					v.pcs[t.pc] = struct{}{}
+					continue currentThreads
 				default:
 					return v.n + i, fmt.Errorf("unknown op: %s", op)
 				}

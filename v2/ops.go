@@ -13,3 +13,8 @@ type OpJump struct {
 type OpFork struct {
 	PC int
 }
+
+type OpRange struct {
+	Start byte
+	End   byte
+}
