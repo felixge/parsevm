@@ -1,17 +1,31 @@
 package vm
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+	"strings"
+)
 
 type Program []Op
 
 // TODO show fork/jmp with absolute pc
 func (p Program) String() string {
-	pcWidth := fmt.Sprintf("%%%dd", len(p)/10+1)
-	var r string
+	buf := &strings.Builder{}
+	prefix := fmt.Sprintf("%%%dd: ", int(math.Log10(float64(len(p)))))
+	fmt.Println(prefix)
 	for pc, op := range p {
-		r += fmt.Sprintf(pcWidth+": %s\n", pc, op)
+		fmt.Fprintf(buf, prefix, pc)
+		switch opT := op.(type) {
+		case OpString:
+			fmt.Fprintf(buf, "string %q", opT.Value)
+		case OpJump:
+			fmt.Fprintf(buf, "jump %d", opT.PC+pc)
+		case OpFork:
+			fmt.Fprintf(buf, "fork %d", opT.PC+pc)
+		}
+		buf.WriteString("\n")
 	}
-	return r
+	return buf.String()
 }
 
 func String(value string) Program {
@@ -28,7 +42,7 @@ func Concat(programs ...Program) Program {
 
 func ZeroOrMore(p Program) Program {
 	fork := OpFork{PC: len(p) + 2}
-	jmp := OpJmp{PC: -(len(p) + 1)}
+	jmp := OpJump{PC: -(len(p) + 1)}
 	return append(append(Program{fork}, p...), jmp)
 }
 
@@ -50,7 +64,7 @@ func Alt(alts ...Program) Program {
 			continue
 		}
 		fork := OpFork{PC: len(a) + 2}
-		jmp := OpJmp{PC: len(b) + 1}
+		jmp := OpJump{PC: len(b) + 1}
 		a = append(append(append(Program{fork}, a...), jmp), b...)
 	}
 	return a

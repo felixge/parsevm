@@ -86,7 +86,7 @@ loop:
 			threads = v.addThread(threads, fork)
 			t.pc++
 			v.stats.Forks++
-		case OpJmp:
+		case OpJump:
 			t.pc += opT.PC
 		default:
 			break loop

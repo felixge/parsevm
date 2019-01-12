@@ -1,96 +1,96 @@
 # Program
 
 ```
-         0: fork +2
-         1: string "a"
-         2: fork +2
-         3: string "a"
-         4: fork +2
-         5: string "a"
-         6: fork +2
-         7: string "a"
-         8: fork +2
-         9: string "a"
-        10: fork +2
-        11: string "a"
-        12: fork +2
-        13: string "a"
-        14: fork +2
-        15: string "a"
-        16: fork +2
-        17: string "a"
-        18: fork +2
-        19: string "a"
-        20: fork +2
-        21: string "a"
-        22: fork +2
-        23: string "a"
-        24: fork +2
-        25: string "a"
-        26: fork +2
-        27: string "a"
-        28: fork +2
-        29: string "a"
-        30: fork +2
-        31: string "a"
-        32: fork +2
-        33: string "a"
-        34: fork +2
-        35: string "a"
-        36: fork +2
-        37: string "a"
-        38: fork +2
-        39: string "a"
-        40: fork +2
-        41: string "a"
-        42: fork +2
-        43: string "a"
-        44: fork +2
-        45: string "a"
-        46: fork +2
-        47: string "a"
-        48: fork +2
-        49: string "a"
-        50: fork +2
-        51: string "a"
-        52: fork +2
-        53: string "a"
-        54: fork +2
-        55: string "a"
-        56: fork +2
-        57: string "a"
-        58: fork +2
-        59: string "a"
-        60: string "a"
-        61: string "a"
-        62: string "a"
-        63: string "a"
-        64: string "a"
-        65: string "a"
-        66: string "a"
-        67: string "a"
-        68: string "a"
-        69: string "a"
-        70: string "a"
-        71: string "a"
-        72: string "a"
-        73: string "a"
-        74: string "a"
-        75: string "a"
-        76: string "a"
-        77: string "a"
-        78: string "a"
-        79: string "a"
-        80: string "a"
-        81: string "a"
-        82: string "a"
-        83: string "a"
-        84: string "a"
-        85: string "a"
-        86: string "a"
-        87: string "a"
-        88: string "a"
-        89: string "a"
+0: fork 2
+1: string "a"
+2: fork 4
+3: string "a"
+4: fork 6
+5: string "a"
+6: fork 8
+7: string "a"
+8: fork 10
+9: string "a"
+10: fork 12
+11: string "a"
+12: fork 14
+13: string "a"
+14: fork 16
+15: string "a"
+16: fork 18
+17: string "a"
+18: fork 20
+19: string "a"
+20: fork 22
+21: string "a"
+22: fork 24
+23: string "a"
+24: fork 26
+25: string "a"
+26: fork 28
+27: string "a"
+28: fork 30
+29: string "a"
+30: fork 32
+31: string "a"
+32: fork 34
+33: string "a"
+34: fork 36
+35: string "a"
+36: fork 38
+37: string "a"
+38: fork 40
+39: string "a"
+40: fork 42
+41: string "a"
+42: fork 44
+43: string "a"
+44: fork 46
+45: string "a"
+46: fork 48
+47: string "a"
+48: fork 50
+49: string "a"
+50: fork 52
+51: string "a"
+52: fork 54
+53: string "a"
+54: fork 56
+55: string "a"
+56: fork 58
+57: string "a"
+58: fork 60
+59: string "a"
+60: string "a"
+61: string "a"
+62: string "a"
+63: string "a"
+64: string "a"
+65: string "a"
+66: string "a"
+67: string "a"
+68: string "a"
+69: string "a"
+70: string "a"
+71: string "a"
+72: string "a"
+73: string "a"
+74: string "a"
+75: string "a"
+76: string "a"
+77: string "a"
+78: string "a"
+79: string "a"
+80: string "a"
+81: string "a"
+82: string "a"
+83: string "a"
+84: string "a"
+85: string "a"
+86: string "a"
+87: string "a"
+88: string "a"
+89: string "a"
 ```
 
 # Complexities

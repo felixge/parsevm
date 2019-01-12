@@ -1,19 +1,15 @@
 package vm
 
-import "fmt"
+type Op interface{}
 
-type Op interface {
-	String() string
+type OpString struct {
+	Value string
 }
 
-type OpString struct{ Value string }
+type OpJump struct {
+	PC int
+}
 
-func (o OpString) String() string { return fmt.Sprintf("string %q", o.Value) }
-
-type OpJmp struct{ PC int }
-
-func (o OpJmp) String() string { return fmt.Sprintf("jmp %+d", o.PC) }
-
-type OpFork struct{ PC int }
-
-func (o OpFork) String() string { return fmt.Sprintf("fork %+d", o.PC) }
+type OpFork struct {
+	PC int
+}
