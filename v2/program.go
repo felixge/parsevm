@@ -22,6 +22,8 @@ func (p Program) String() string {
 			fmt.Fprintf(buf, "jump %d", opT.PC+pc)
 		case OpFork:
 			fmt.Fprintf(buf, "fork %d", opT.PC+pc)
+		default:
+			panic(fmt.Errorf("unknown op: %#v", opT))
 		}
 		buf.WriteString("\n")
 	}
