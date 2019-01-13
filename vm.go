@@ -6,8 +6,16 @@ import (
 )
 
 func NewVM(p Program) *VM {
-	v := &VM{}
-	v.threads = v.addThread(v.threads, &thread{p: p})
+	funcs := map[string]int{}
+	for pc, op := range p {
+		if opT, ok := op.(OpFunc); ok {
+			funcs[opT.Name] = pc + 1
+		}
+	}
+
+	v := &VM{p: p, funcs: funcs}
+	v.threads = v.addThread(v.threads, &thread{})
+
 	return v
 }
 
@@ -18,6 +26,8 @@ type VM struct {
 	threads []*thread
 	stats   Stats
 	pcs     map[int]struct{}
+	p       Program
+	funcs   map[string]int
 }
 
 func (v *VM) Write(data []byte) (int, error) {
@@ -25,16 +35,16 @@ func (v *VM) Write(data []byte) (int, error) {
 		var nextThreads []*thread
 		v.pcs = map[int]struct{}{}
 
-		for i := 0; i < len(v.threads); i++ {
+		for j := 0; j < len(v.threads); j++ {
 			v.stats.Ops++
-			t := v.threads[i]
+			t := v.threads[j]
 			// If the thread is already at the end of the program, an additional
 			// char will kill it.
-			if t.pc >= len(t.p) {
+			if t.pc >= len(v.p) {
 				continue
 			}
 
-			op := t.p[t.pc]
+			op := v.p[t.pc]
 			switch opT := op.(type) {
 			case OpString:
 				// If char doesn't match, kill this thread.
@@ -44,7 +54,7 @@ func (v *VM) Write(data []byte) (int, error) {
 
 				// Increment our op counter (offset) into this string.
 				t.oc++
-				if t.oc == len(opT.Value) {
+				if t.oc >= len(opT.Value) {
 					// We're done matching the string, move on to the next op and
 					// reset our op counter (offset).
 					t.pc++
@@ -57,7 +67,7 @@ func (v *VM) Write(data []byte) (int, error) {
 
 				t.pc++
 			default:
-				return v.n + i, fmt.Errorf("unknown op: %s", op)
+				return v.n + i, fmt.Errorf("unknown op: %T", op)
 			}
 
 			nextThreads = v.addThread(nextThreads, t)
@@ -67,7 +77,8 @@ func (v *VM) Write(data []byte) (int, error) {
 		v.threads = nextThreads
 
 		if len(nextThreads) == 0 {
-			return v.n + i, io.ErrShortWrite
+			v.n += i
+			return i, io.ErrShortWrite
 		}
 	}
 	n := len(data)
@@ -77,17 +88,32 @@ func (v *VM) Write(data []byte) (int, error) {
 
 func (v *VM) addThread(threads []*thread, t *thread) []*thread {
 loop:
-	for t.pc < len(t.p) {
+	for t.pc < len(v.p) {
 		v.stats.Ops++
-		op := t.p[t.pc]
+		op := v.p[t.pc]
 		switch opT := op.(type) {
 		case OpFork:
-			fork := &thread{p: t.p, pc: t.pc + opT.PC}
+			stack := make([]int, len(t.stack))
+			copy(stack, t.stack)
+			fork := &thread{pc: t.pc + opT.PC, stack: stack}
 			threads = v.addThread(threads, fork)
 			t.pc++
 			v.stats.Forks++
 		case OpJump:
 			t.pc += opT.PC
+		case OpCall:
+			t.stack = append(t.stack, t.pc+1)
+			t.pc = v.funcs[opT.Name]
+		case OpReturn:
+			t.pc = t.stack[len(t.stack)-1]
+			t.stack = t.stack[0 : len(t.stack)-1]
+		case OpHalt:
+			t.pc = len(v.p)
+		case OpString:
+			if opT.Value != "" {
+				break loop
+			}
+			t.pc++
 		default:
 			break loop
 		}
@@ -104,7 +130,7 @@ func (v *VM) Valid() bool {
 	for _, t := range v.threads {
 		v.stats.Ops++
 
-		if t.pc == len(t.p) {
+		if t.pc == len(v.p) {
 			return true
 		}
 	}
@@ -121,7 +147,6 @@ type thread struct {
 	// oc is the operation counter, i.e. an offset into a multi-character op, e.g
 	// OpString.
 	oc int
-	// p is the program executed by the thread. The program is a set of ops, and
-	// it's always the same for all threads of the same vm.
-	p Program
+	// stack contains the pc values of OpCall ops that haven't been returned to yet.
+	stack []int
 }

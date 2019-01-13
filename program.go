@@ -22,6 +22,14 @@ func (p Program) String() string {
 			fmt.Fprintf(buf, "fork %d", opT.PC+pc)
 		case OpRange:
 			fmt.Fprintf(buf, "range %q %q", string(opT.Start), string(opT.End))
+		case OpFunc:
+			fmt.Fprintf(buf, "func %q", opT.Name)
+		case OpCall:
+			fmt.Fprintf(buf, "call %q", opT.Name)
+		case OpHalt:
+			fmt.Fprintf(buf, "halt")
+		case OpReturn:
+			fmt.Fprintf(buf, "return")
 		default:
 			panic(fmt.Errorf("unknown op: %#v", opT))
 		}
@@ -85,4 +93,16 @@ func Repeat(min, max int, p Program) Program {
 
 func Range(start byte, end byte) Program {
 	return Program{OpRange{Start: start, End: end}}
+}
+
+func Func(name string, p Program) Program {
+	return append(append(Program{OpFunc{Name: name}}, p...), OpReturn{})
+}
+
+func Call(name string) Program {
+	return Program{OpCall{Name: name}}
+}
+
+func Halt() Program {
+	return Program{OpHalt{}}
 }

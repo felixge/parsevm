@@ -144,6 +144,46 @@ func TestVM_Valid(t *testing.T) {
 				"adcd",
 			},
 		},
+
+		{
+			"Func_Simple",
+			[]testProgram{
+				{"abc1", Concat(Call("abc"), Halt(), Func("abc", String("abc")))},
+			},
+			[]string{
+				"",
+				"a",
+				"abc",
+				"abcd",
+				"b",
+			},
+		},
+
+		{
+			"Func_Recursive",
+			[]testProgram{
+				{"pairs", Concat(
+					Call("pair"),
+					Halt(),
+					Func("pair", Concat(
+						String("("),
+						Alt(Call("pair"), String("")),
+						String(")"),
+					)))},
+			},
+			[]string{
+				"()",
+				"(())",
+				"((()))",
+
+				"",
+				"(",
+				")",
+				"(()",
+				"())",
+				"()()",
+			},
+		},
 	}
 
 	gf := gc.GoldenFixtures("vm_valid")
@@ -158,35 +198,38 @@ func TestVM_Valid(t *testing.T) {
 
 		fmt.Fprintf(buf, "## Inputs\n\n")
 
-		for i, input := range test.Inputs {
-			var table [][]string
-			table = append(table, []string{"Program", "Valid", "n", "err", "ops", "forks"})
+		t.Run(test.Name, func(t *testing.T) {
+			for i, input := range test.Inputs {
+				var table [][]string
+				table = append(table, []string{"Program", "Valid", "n", "err", "ops", "forks"})
 
-			inputID := fmt.Sprintf("%d", i+1)
-			t.Run(inputID, func(t *testing.T) {
-				fmt.Fprintf(buf, "## Input %s: %q\n\n", inputID, input)
+				inputID := fmt.Sprintf("%d", i+1)
+				t.Run(inputID, func(t *testing.T) {
+					fmt.Fprintf(buf, "## Input %s: %q\n\n", inputID, input)
 
-				for _, program := range test.Programs {
-					t.Run(program.Name, func(t *testing.T) {
-						vm := NewVM(program.Program)
-						n, err := vm.Write([]byte(input))
-						valid := vm.Valid()
-						stats := vm.Stats()
+					for _, program := range test.Programs {
+						t.Run(program.Name, func(t *testing.T) {
+							vm := NewVM(program.Program)
+							n, err := vm.Write([]byte(input))
+							valid := vm.Valid()
+							stats := vm.Stats()
 
-						table = append(table, []string{
-							program.Name,
-							fmt.Sprintf("%t", valid),
-							fmt.Sprintf("%d", n),
-							fmt.Sprintf("%v", err),
-							fmt.Sprintf("%d", stats.Ops),
-							fmt.Sprintf("%d", stats.Forks),
+							table = append(table, []string{
+								program.Name,
+								fmt.Sprintf("%t", valid),
+								fmt.Sprintf("%d", n),
+								fmt.Sprintf("%v", err),
+								fmt.Sprintf("%d", stats.Ops),
+								fmt.Sprintf("%d", stats.Forks),
+							})
 						})
-					})
-				}
-				fmt.Fprintf(buf, "%s\n", markdownTable(table))
-			})
+					}
+					fmt.Fprintf(buf, "%s\n", markdownTable(table))
+				})
 
-		}
+			}
+		})
+
 		gf.Add(buf.Bytes(), test.Name+".md")
 	}
 	if err := gf.Test(); err != nil {

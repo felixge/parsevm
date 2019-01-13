@@ -18,3 +18,15 @@ type OpRange struct {
 	Start byte
 	End   byte
 }
+
+type OpFunc struct {
+	Name string
+}
+
+type OpReturn struct{}
+
+type OpCall struct {
+	Name string
+}
+
+type OpHalt struct{}
