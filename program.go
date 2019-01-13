@@ -8,7 +8,6 @@ import (
 
 type Program []Op
 
-// TODO show fork/jmp with absolute pc
 func (p Program) String() string {
 	buf := &strings.Builder{}
 	prefix := fmt.Sprintf("%%%dd: ", int(1+math.Log10(float64(len(p)))))
