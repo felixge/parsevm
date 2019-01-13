@@ -35,9 +35,8 @@ func (v *VM) Write(data []byte) (int, error) {
 		var nextThreads []*thread
 		v.pcs = map[int]struct{}{}
 
-		for j := 0; j < len(v.threads); j++ {
+		for _, t := range v.threads {
 			v.stats.Ops++
-			t := v.threads[j]
 			// If the thread is already at the end of the program, an additional
 			// char will kill it.
 			if t.pc >= len(v.p) {
