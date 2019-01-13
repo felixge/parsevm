@@ -220,7 +220,7 @@ func TestVM_Valid(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			for i, input := range test.Inputs {
 				var table [][]string
-				table = append(table, []string{"Program", "Valid", "n", "err", "ops", "forks"})
+				table = append(table, []string{"Program", "Valid", "n", "err", "ops", "forks", "concurrency"})
 
 				inputID := fmt.Sprintf("%d", i+1)
 				t.Run(inputID, func(t *testing.T) {
@@ -240,6 +240,7 @@ func TestVM_Valid(t *testing.T) {
 								fmt.Sprintf("%v", err),
 								fmt.Sprintf("%d", stats.Ops),
 								fmt.Sprintf("%d", stats.Forks),
+								fmt.Sprintf("%d", stats.Concurrency),
 							})
 						})
 					}

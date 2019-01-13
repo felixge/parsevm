@@ -118,55 +118,55 @@
 
 ## Input 1: "{}"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| json    | true  | 2 | <nil> | 122 |    23 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| json    | true  | 2 | <nil> | 122 |    23 |          11 |
 
 ## Input 2: "[]"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| json    | true  | 2 | <nil> | 143 |    29 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| json    | true  | 2 | <nil> | 143 |    29 |          16 |
 
 ## Input 3: "\"abc\""
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| json    | true  | 5 | <nil> | 176 |    38 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| json    | true  | 5 | <nil> | 176 |    38 |          11 |
 
 ## Input 4: "123"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| json    | true  | 3 | <nil> | 135 |    25 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| json    | true  | 3 | <nil> | 135 |    25 |          11 |
 
 ## Input 5: "true"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| json    | true  | 4 | <nil> |  76 |    14 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| json    | true  | 4 | <nil> |  76 |    14 |          11 |
 
 ## Input 6: "false"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| json    | true  | 5 | <nil> |  77 |    14 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| json    | true  | 5 | <nil> |  77 |    14 |          11 |
 
 ## Input 7: "null"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| json    | true  | 4 | <nil> |  74 |    14 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| json    | true  | 4 | <nil> |  74 |    14 |          11 |
 
 ## Input 8: "{\"foo\": \"bar\", \"hello\": {\"world\": true, \"yes\": 123}}"
 
-| PROGRAM | VALID | N  |  ERR  | OPS  | FORKS |
-|---------|-------|----|-------|------|-------|
-| json    | true  | 52 | <nil> | 1433 |   297 |
+| PROGRAM | VALID | N  |  ERR  | OPS  | FORKS | CONCURRENCY |
+|---------|-------|----|-------|------|-------|-------------|
+| json    | true  | 52 | <nil> | 1433 |   297 |          11 |
 
 ## Input 9: "[{\"foo\": \"bar\", \"hello\": {\"world\": true, \"yes\": [123, false, null]}}]"
 
-| PROGRAM | VALID | N  |  ERR  | OPS  | FORKS |
-|---------|-------|----|-------|------|-------|
-| json    | true  | 69 | <nil> | 1849 |   379 |
+| PROGRAM | VALID | N  |  ERR  | OPS  | FORKS | CONCURRENCY |
+|---------|-------|----|-------|------|-------|-------------|
+| json    | true  | 69 | <nil> | 1849 |   379 |          16 |
 

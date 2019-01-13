@@ -34,55 +34,55 @@
 
 ## Input 1: "hello world"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 0 | short write |   2 |     0 |
-| abc2a   | false | 0 | short write |   2 |     0 |
-| abc2b   | false | 0 | short write |   2 |     0 |
-| abc3    | false | 0 | short write |   2 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 0 | short write |   2 |     0 |           1 |
+| abc2a   | false | 0 | short write |   2 |     0 |           1 |
+| abc2b   | false | 0 | short write |   2 |     0 |           1 |
+| abc3    | false | 0 | short write |   2 |     0 |           1 |
 
 ## Input 2: "world hello"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 0 | short write |   2 |     0 |
-| abc2a   | false | 0 | short write |   2 |     0 |
-| abc2b   | false | 0 | short write |   2 |     0 |
-| abc3    | false | 0 | short write |   2 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 0 | short write |   2 |     0 |           1 |
+| abc2a   | false | 0 | short write |   2 |     0 |           1 |
+| abc2b   | false | 0 | short write |   2 |     0 |           1 |
+| abc3    | false | 0 | short write |   2 |     0 |           1 |
 
 ## Input 3: "helloworld"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 0 | short write |   2 |     0 |
-| abc2a   | false | 0 | short write |   2 |     0 |
-| abc2b   | false | 0 | short write |   2 |     0 |
-| abc3    | false | 0 | short write |   2 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 0 | short write |   2 |     0 |           1 |
+| abc2a   | false | 0 | short write |   2 |     0 |           1 |
+| abc2b   | false | 0 | short write |   2 |     0 |           1 |
+| abc3    | false | 0 | short write |   2 |     0 |           1 |
 
 ## Input 4: "hhello world"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 0 | short write |   2 |     0 |
-| abc2a   | false | 0 | short write |   2 |     0 |
-| abc2b   | false | 0 | short write |   2 |     0 |
-| abc3    | false | 0 | short write |   2 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 0 | short write |   2 |     0 |           1 |
+| abc2a   | false | 0 | short write |   2 |     0 |           1 |
+| abc2b   | false | 0 | short write |   2 |     0 |           1 |
+| abc3    | false | 0 | short write |   2 |     0 |           1 |
 
 ## Input 5: ""
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | false | 0 | <nil> |   2 |     0 |
-| abc2a   | false | 0 | <nil> |   2 |     0 |
-| abc2b   | false | 0 | <nil> |   2 |     0 |
-| abc3    | false | 0 | <nil> |   2 |     0 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | false | 0 | <nil> |   2 |     0 |           0 |
+| abc2a   | false | 0 | <nil> |   2 |     0 |           0 |
+| abc2b   | false | 0 | <nil> |   2 |     0 |           0 |
+| abc3    | false | 0 | <nil> |   2 |     0 |           0 |
 
 ## Input 6: "hello"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 0 | short write |   2 |     0 |
-| abc2a   | false | 0 | short write |   2 |     0 |
-| abc2b   | false | 0 | short write |   2 |     0 |
-| abc3    | false | 0 | short write |   2 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 0 | short write |   2 |     0 |           1 |
+| abc2a   | false | 0 | short write |   2 |     0 |           1 |
+| abc2b   | false | 0 | short write |   2 |     0 |           1 |
+| abc3    | false | 0 | short write |   2 |     0 |           1 |
 

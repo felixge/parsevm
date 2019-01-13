@@ -33,81 +33,81 @@
 
 ## Input 1: "a"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| b-d1    | false | 0 | short write |   2 |     0 |
-| b-d2    | false | 0 | short write |   5 |     1 |
-| b-d3    | false | 0 | short write |   8 |     2 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| b-d1    | false | 0 | short write |   2 |     0 |           1 |
+| b-d2    | false | 0 | short write |   5 |     1 |           2 |
+| b-d3    | false | 0 | short write |   8 |     2 |           3 |
 
 ## Input 2: "b"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| b-d1    | true  | 1 | <nil> |   3 |     0 |
-| b-d2    | true  | 1 | <nil> |   7 |     1 |
-| b-d3    | true  | 1 | <nil> |  11 |     2 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| b-d1    | true  | 1 | <nil> |   3 |     0 |           1 |
+| b-d2    | true  | 1 | <nil> |   7 |     1 |           2 |
+| b-d3    | true  | 1 | <nil> |  11 |     2 |           3 |
 
 ## Input 3: "c"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| b-d1    | true  | 1 | <nil> |   3 |     0 |
-| b-d2    | true  | 1 | <nil> |   6 |     1 |
-| b-d3    | true  | 1 | <nil> |  10 |     2 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| b-d1    | true  | 1 | <nil> |   3 |     0 |           1 |
+| b-d2    | true  | 1 | <nil> |   6 |     1 |           2 |
+| b-d3    | true  | 1 | <nil> |  10 |     2 |           3 |
 
 ## Input 4: "d"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| b-d1    | true  | 1 | <nil> |   3 |     0 |
-| b-d2    | true  | 1 | <nil> |   6 |     1 |
-| b-d3    | true  | 1 | <nil> |   9 |     2 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| b-d1    | true  | 1 | <nil> |   3 |     0 |           1 |
+| b-d2    | true  | 1 | <nil> |   6 |     1 |           2 |
+| b-d3    | true  | 1 | <nil> |   9 |     2 |           3 |
 
 ## Input 5: "e"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| b-d1    | false | 0 | short write |   2 |     0 |
-| b-d2    | false | 0 | short write |   5 |     1 |
-| b-d3    | false | 0 | short write |   8 |     2 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| b-d1    | false | 0 | short write |   2 |     0 |           1 |
+| b-d2    | false | 0 | short write |   5 |     1 |           2 |
+| b-d3    | false | 0 | short write |   8 |     2 |           3 |
 
 ## Input 6: "ab"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| b-d1    | false | 0 | short write |   2 |     0 |
-| b-d2    | false | 0 | short write |   5 |     1 |
-| b-d3    | false | 0 | short write |   8 |     2 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| b-d1    | false | 0 | short write |   2 |     0 |           1 |
+| b-d2    | false | 0 | short write |   5 |     1 |           2 |
+| b-d3    | false | 0 | short write |   8 |     2 |           3 |
 
 ## Input 7: "bb"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| b-d1    | false | 1 | short write |   3 |     0 |
-| b-d2    | false | 1 | short write |   7 |     1 |
-| b-d3    | false | 1 | short write |  11 |     2 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| b-d1    | false | 1 | short write |   3 |     0 |           1 |
+| b-d2    | false | 1 | short write |   7 |     1 |           2 |
+| b-d3    | false | 1 | short write |  11 |     2 |           3 |
 
 ## Input 8: "cc"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| b-d1    | false | 1 | short write |   3 |     0 |
-| b-d2    | false | 1 | short write |   6 |     1 |
-| b-d3    | false | 1 | short write |  10 |     2 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| b-d1    | false | 1 | short write |   3 |     0 |           1 |
+| b-d2    | false | 1 | short write |   6 |     1 |           2 |
+| b-d3    | false | 1 | short write |  10 |     2 |           3 |
 
 ## Input 9: "dd"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| b-d1    | false | 1 | short write |   3 |     0 |
-| b-d2    | false | 1 | short write |   6 |     1 |
-| b-d3    | false | 1 | short write |   9 |     2 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| b-d1    | false | 1 | short write |   3 |     0 |           1 |
+| b-d2    | false | 1 | short write |   6 |     1 |           2 |
+| b-d3    | false | 1 | short write |   9 |     2 |           3 |
 
 ## Input 10: "ec"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| b-d1    | false | 0 | short write |   2 |     0 |
-| b-d2    | false | 0 | short write |   5 |     1 |
-| b-d3    | false | 0 | short write |   8 |     2 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| b-d1    | false | 0 | short write |   2 |     0 |           1 |
+| b-d2    | false | 0 | short write |   5 |     1 |           2 |
+| b-d3    | false | 0 | short write |   8 |     2 |           3 |
 

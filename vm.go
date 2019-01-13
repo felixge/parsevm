@@ -34,6 +34,9 @@ func (v *VM) Write(data []byte) (int, error) {
 	for i, c := range data {
 		var nextThreads []*thread
 		v.pcs = map[int]struct{}{}
+		if l := len(v.threads); l > v.stats.Concurrency {
+			v.stats.Concurrency = l
+		}
 
 		for _, t := range v.threads {
 			v.stats.Ops++

@@ -16,31 +16,31 @@
 
 ## Input 1: ""
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | false | 0 | <nil> |   3 |     0 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | false | 0 | <nil> |   3 |     0 |           0 |
 
 ## Input 2: "a"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | false | 1 | <nil> |   5 |     0 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | false | 1 | <nil> |   5 |     0 |           1 |
 
 ## Input 3: "abc"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | true  | 3 | <nil> |  10 |     0 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | true  | 3 | <nil> |  10 |     0 |           1 |
 
 ## Input 4: "abcd"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 3 | short write |  10 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 3 | short write |  10 |     0 |           1 |
 
 ## Input 5: "b"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 0 | short write |   3 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 0 | short write |   3 |     0 |           1 |
 

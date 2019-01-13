@@ -32,50 +32,50 @@
 
 ## Input 1: ""
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | false | 0 | <nil> |   2 |     0 |
-| abc3    | false | 0 | <nil> |   2 |     0 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | false | 0 | <nil> |   2 |     0 |           0 |
+| abc3    | false | 0 | <nil> |   2 |     0 |           0 |
 
 ## Input 2: "ab"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | false | 2 | <nil> |   6 |     0 |
-| abc3    | false | 2 | <nil> |   6 |     0 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | false | 2 | <nil> |   6 |     0 |           1 |
+| abc3    | false | 2 | <nil> |   6 |     0 |           1 |
 
 ## Input 3: "abc"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | true  | 3 | <nil> |  11 |     2 |
-| abc3    | true  | 3 | <nil> |  11 |     2 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | true  | 3 | <nil> |  11 |     2 |           1 |
+| abc3    | true  | 3 | <nil> |  11 |     2 |           1 |
 
 ## Input 4: "abcabc"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | true  | 6 | <nil> |  24 |     3 |
-| abc3    | true  | 6 | <nil> |  24 |     3 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | true  | 6 | <nil> |  24 |     3 |           3 |
+| abc3    | true  | 6 | <nil> |  24 |     3 |           3 |
 
 ## Input 5: "abcabcabc"
 
-| PROGRAM | VALID | N |  ERR  | OPS | FORKS |
-|---------|-------|---|-------|-----|-------|
-| abc1    | true  | 9 | <nil> |  30 |     3 |
-| abc3    | true  | 9 | <nil> |  30 |     3 |
+| PROGRAM | VALID | N |  ERR  | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------|-----|-------|-------------|
+| abc1    | true  | 9 | <nil> |  30 |     3 |           3 |
+| abc3    | true  | 9 | <nil> |  30 |     3 |           3 |
 
 ## Input 6: "abcabcabcabc"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 9 | short write |  30 |     3 |
-| abc3    | false | 9 | short write |  30 |     3 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 9 | short write |  30 |     3 |           3 |
+| abc3    | false | 9 | short write |  30 |     3 |           3 |
 
 ## Input 7: "adcd"
 
-| PROGRAM | VALID | N |     ERR     | OPS | FORKS |
-|---------|-------|---|-------------|-----|-------|
-| abc1    | false | 1 | short write |   4 |     0 |
-| abc3    | false | 1 | short write |   4 |     0 |
+| PROGRAM | VALID | N |     ERR     | OPS | FORKS | CONCURRENCY |
+|---------|-------|---|-------------|-----|-------|-------------|
+| abc1    | false | 1 | short write |   4 |     0 |           1 |
+| abc3    | false | 1 | short write |   4 |     0 |           1 |
 
