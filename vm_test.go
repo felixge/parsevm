@@ -184,6 +184,25 @@ func TestVM_Valid(t *testing.T) {
 				"()()",
 			},
 		},
+
+		{
+			"JSON",
+			[]testProgram{
+				{"json", compileJSON()},
+			},
+			[]string{
+				`{}`,
+				`[]`,
+				`"abc"`,
+				`123`,
+				`true`,
+				`false`,
+				`null`,
+
+				`{"foo": "bar", "hello": {"world": true, "yes": 123}}`,
+				`[{"foo": "bar", "hello": {"world": true, "yes": [123, false, null]}}]`,
+			},
+		},
 	}
 
 	gf := gc.GoldenFixtures("vm_valid")
@@ -285,4 +304,81 @@ func markdownTable(data [][]string) string {
 	table.AppendBulk(data[1:])
 	table.Render()
 	return buf.String()
+}
+
+func compileJSON() Program {
+	return Concat(
+		Call("element"),
+		Halt(),
+		Func("value", Alt(
+			Call("object"),
+			Call("array"),
+			Call("string"),
+			Call("number"),
+			String("true"),
+			String("false"),
+			String("null"),
+		)),
+		Func("object", Concat(
+			String("{"),
+			Alt(Call("ws"), Call("members")),
+			String("}"),
+		)),
+		Func("members", Concat(
+			Call("member"),
+			ZeroOrOne(Concat(
+				String(","),
+				Call("members"),
+			)),
+		)),
+		Func("member", Concat(
+			Call("ws"),
+			Call("string"),
+			Call("ws"),
+			String(":"),
+			Call("element"),
+		)),
+		Func("array", Concat(
+			String("["),
+			Alt(Call("ws"), Call("elements")),
+			String("]"),
+		)),
+		Func("elements", Concat(
+			Call("element"),
+			ZeroOrOne(Concat(
+				String(","),
+				Call("elements"),
+			)),
+		)),
+		Func("element", Concat(
+			Call("ws"),
+			Call("value"),
+			Call("ws"),
+		)),
+		Func("string", Concat(
+			String(`"`),
+			Call("characters"),
+			String(`"`),
+		)),
+		// TODO from this point on this is a simplification of the JSON spec. Need to
+		// support unicode to do this right.
+		Func("characters", ZeroOrMore(Alt(
+			Range('a', 'z'),
+			Range('A', 'Z'),
+			Range('0', '9'),
+			String(" "),
+			String("."),
+			String(","),
+		))),
+		Func("number", OneOrMore(
+			Range('0', '9'),
+		)),
+		Func("ws", Alt(
+			String(""),
+			String("\x09"),
+			String("\x0a"),
+			String("\x0d"),
+			String("\x20"),
+		)),
+	)
 }
